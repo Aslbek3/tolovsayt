@@ -1,0 +1,24 @@
+<%- include('../partials/header') %>
+<h1>To'lovlar tarixi</h1>
+<div class="card table-wrap">
+<% if (!payments.length) { %><p class="muted center">Hali to'lovlar yo'q.</p><% } else { %>
+  <table>
+    <tr><th>Sana</th><th>Xizmat</th><th>Muddat</th><th>Summa</th><th>Holat</th></tr>
+    <% payments.forEach(p => { %>
+    <tr>
+      <td><%= u.fmtDate(p.created_at) %></td>
+      <td><%= p.service_name %></td>
+      <td><%= p.months %> oy</td>
+      <td><%= u.money(p.amount) %></td>
+      <td>
+        <% if (p.status === 'pending') { %><span class="badge amber">Tekshirilmoqda</span>
+        <% } else if (p.status === 'approved') { %><span class="badge green">Tasdiqlandi</span>
+        <% } else { %><span class="badge red">Rad etildi</span><% } %>
+        <% if (p.status === 'rejected' && p.admin_note) { %><div class="muted small"><%= p.admin_note %></div><% } %>
+      </td>
+    </tr>
+    <% }) %>
+  </table>
+<% } %>
+</div>
+<%- include('../partials/footer') %>

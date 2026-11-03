@@ -1,0 +1,27 @@
+<%- include('../partials/header') %>
+<a href="/hisobim" class="small">← Orqaga</a>
+<div class="card narrow" style="max-width:520px;margin-top:10px">
+  <h1 style="margin-top:4px">Hisobni to'ldirish</h1>
+  <p class="muted">Qo'shgan summangiz admin tasdiqlagach balansingizga tushadi, keyin xizmatlarga to'lov qilishda balansdan foydalanishingiz mumkin.</p>
+
+  <form method="post" action="/topup" enctype="multipart/form-data">
+    <label>Qancha pul qo'shasiz?</label>
+    <input name="amount" type="text" inputmode="numeric" placeholder="masalan 100000" required>
+
+    <div class="paybox">
+      <div class="muted small">Quyidagi kartaga o'tkazing (<%= settings.card_bank %>)</div>
+      <div class="row between">
+        <div class="card-num" id="card"><%= settings.card_number %></div>
+        <button type="button" class="btn sm ghost" onclick="navigator.clipboard.writeText(document.getElementById('card').innerText.replace(/\s/g,''));this.innerText='Nusxalandi ✓'">Nusxalash</button>
+      </div>
+      <div><%= settings.card_holder %></div>
+    </div>
+
+    <label>Chek rasmi (skrinshot yoki PDF)</label>
+    <input type="file" name="receipt" accept="image/*,.pdf" required>
+    <label>Izoh (ixtiyoriy)</label>
+    <input name="comment" placeholder="Masalan: Payme orqali to'ladim">
+    <button class="btn full">Chekni yuborish</button>
+  </form>
+</div>
+<%- include('../partials/footer') %>

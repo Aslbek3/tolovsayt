@@ -1,0 +1,10 @@
+<%- include('../partials/header') %>
+<div class="card narrow login">
+  <h1 class="center">Admin panel</h1>
+  <form method="post" action="/admin/login">
+    <label>Login</label><input name="username" required autofocus>
+    <label>Parol</label><input name="password" type="password" required>
+    <button class="btn full">Kirish</button>
+  </form>
+</div>
+<%- include('../partials/footer') %>

@@ -1,0 +1,38 @@
+<%- include('../partials/header') %>
+<div class="row between">
+  <h1>Assalomu alaykum, <%= me.name %>!</h1>
+</div>
+
+<% if (!me.tg_chat_id && botUsername) { %>
+  <div class="card row between">
+    <div>
+      <b>🔔 Telegram eslatmalarni yoqing</b>
+      <div class="muted small">To'lov muddati yaqinlashganda va to'lov tasdiqlanganda Telegramga xabar keladi.</div>
+    </div>
+    <form method="post" action="/telegram-link" target="_blank"><button class="btn">Telegramni ulash</button></form>
+  </div>
+<% } %>
+
+<% if (!services.length) { %>
+  <div class="card center muted">Sizda hali xizmat yo'q.</div>
+<% } %>
+
+<div class="grid">
+<% services.forEach(s => { %>
+  <div class="card svc">
+    <div class="row between">
+      <span class="type"><%= s.type === 'sayt' ? '🌐 Veb sayt' : '🤖 Telegram bot' %></span>
+      <%- include('../partials/badge', { s }) %>
+    </div>
+    <h3 style="margin-top:8px"><%= s.name %></h3>
+    <div class="price"><%= u.money(s.price) %> <span class="muted small">/ oy</span></div>
+    <div class="meta">To'langan muddat: <b><%= u.fmtDate(s.paid_until) %></b> gacha</div>
+    <% if (pending.includes(s.id)) { %>
+      <button class="btn ghost full" disabled>⏳ To'lov tekshirilmoqda</button>
+    <% } else { %>
+      <a class="btn full" href="/pay/<%= s.id %>">To'lash</a>
+    <% } %>
+  </div>
+<% }) %>
+</div>
+<%- include('../partials/footer') %>

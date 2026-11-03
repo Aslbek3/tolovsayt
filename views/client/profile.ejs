@@ -1,0 +1,24 @@
+<%- include('../partials/header') %>
+<h1>Profil</h1>
+<div class="cols">
+  <div class="card">
+    <h2>Ma'lumotlar</h2>
+    <p><span class="muted">Ism:</span> <b><%= me.name %></b></p>
+    <p><span class="muted">Telefon:</span> <b>+<%= me.phone %></b></p>
+    <p><span class="muted">Telegram:</span> <%- me.tg_chat_id ? '<span class="badge green">Ulangan</span>' : '<span class="badge gray">Ulanmagan</span>' %></p>
+    <% if (!me.tg_chat_id) { %>
+      <form method="post" action="/telegram-link" target="_blank"><button class="btn sm">Telegramni ulash</button></form>
+    <% } else { %>
+      <form method="post" action="/telegram-unlink" onsubmit="return confirm('Telegramni uzasizmi?')"><button class="btn sm ghost">Uzish</button></form>
+    <% } %>
+  </div>
+  <div class="card">
+    <h2>Parolni o'zgartirish</h2>
+    <form method="post" action="/profile/password">
+      <label>Eski parol</label><input type="password" name="old_password" required>
+      <label>Yangi parol</label><input type="password" name="new_password" minlength="6" required>
+      <button class="btn full">Saqlash</button>
+    </form>
+  </div>
+</div>
+<%- include('../partials/footer') %>

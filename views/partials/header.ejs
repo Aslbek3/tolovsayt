@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %> — <%= settings.site_name %></title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<% if (typeof admin !== 'undefined' && admin && !path.startsWith('/login')) { %>
+  <header class="top">
+    <a class="brand" href="/admin"><span class="logo">₿</span> <%= settings.site_name %> <small>admin</small></a>
+    <nav>
+      <a href="/admin" class="<%= path === '/' ? 'on' : '' %>">Panel</a>
+      <a href="/admin/clients" class="<%= path.startsWith('/clients') ? 'on' : '' %>">Mijozlar</a>
+      <a href="/admin/services" class="<%= path.startsWith('/services') ? 'on' : '' %>">Xizmatlar</a>
+      <a href="/admin/payments" class="<%= path.startsWith('/payments') ? 'on' : '' %>">To'lovlar</a>
+      <a href="/admin/topups" class="<%= path.startsWith('/topups') ? 'on' : '' %>">Pul qo'shish</a>
+      <a href="/admin/settings" class="<%= path.startsWith('/settings') ? 'on' : '' %>">Sozlamalar</a>
+      <form method="post" action="/admin/logout"><button class="link">Chiqish</button></form>
+    </nav>
+  </header>
+<% } else if (typeof me !== 'undefined' && me) { %>
+  <header class="top">
+    <a class="brand" href="/"><span class="logo">₿</span> <%= settings.site_name %></a>
+    <nav>
+      <a href="/" class="<%= path === '/' ? 'on' : '' %>">Xizmatlarim</a>
+      <a href="/hisobim" class="<%= path.startsWith('/hisobim') ? 'on' : '' %>">Hisobim</a>
+      <a href="/payments" class="<%= path.startsWith('/payments') ? 'on' : '' %>">To'lovlar</a>
+      <a href="/profile" class="<%= path.startsWith('/profile') ? 'on' : '' %>">Profil</a>
+      <form method="post" action="/logout"><button class="link">Chiqish</button></form>
+    </nav>
+  </header>
+<% } %>
+<main class="wrap">
+<% if (flash) { %><div class="alert <%= flash.type %>"><%= flash.msg %></div><% } %>

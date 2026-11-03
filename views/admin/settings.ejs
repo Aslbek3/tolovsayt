@@ -1,0 +1,23 @@
+<%- include('../partials/header') %>
+<h1>Sozlamalar</h1>
+<form method="post" action="/admin/settings">
+<div class="cols">
+  <div class="card">
+    <h2>💳 To'lov kartasi</h2>
+    <label>Karta raqami</label><input name="card_number" value="<%= s.card_number %>">
+    <label>Karta egasi</label><input name="card_holder" value="<%= s.card_holder %>">
+    <label>Bank / turi</label><input name="card_bank" value="<%= s.card_bank %>" placeholder="Uzcard, Humo...">
+    <label>To'lov sahifasidagi izoh</label><textarea name="pay_note"><%= s.pay_note %></textarea>
+  </div>
+  <div class="card">
+    <h2>⏰ Eslatma va to'xtatish</h2>
+    <label>Sayt nomi</label><input name="site_name" value="<%= s.site_name %>">
+    <label>Necha kun oldin eslatilsin (vergul bilan)</label><input name="remind_days" value="<%= s.remind_days %>">
+    <p class="muted small">Masalan <code>5,3,1,0</code> — muddat tugashidan 5, 3, 1 kun oldin va tugagan kuni Telegramga eslatma.</p>
+    <label>Muddat o'tgach necha kun kutib, keyin to'xtatilsin</label><input name="grace_days" type="number" min="0" value="<%= s.grace_days %>">
+    <p class="muted small">Tekshiruv har kuni soat 10:00 da (Toshkent vaqti) avtomatik ishlaydi.</p>
+  </div>
+</div>
+<button class="btn">Saqlash</button>
+</form>
+<%- include('../partials/footer') %>

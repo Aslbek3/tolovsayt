@@ -1,0 +1,23 @@
+<tr>
+  <td>#<%= t.id %><div class="muted small"><%= t.created_at %></div></td>
+  <td><a href="/admin/clients/<%= t.client_id %>"><%= t.client_name %></a><div class="muted small">+<%= t.phone %></div></td>
+  <td><b><%= u.money(t.amount) %></b><% if (t.comment) { %><div class="muted small"><%= t.comment %></div><% } %></td>
+  <td>
+    <% if (t.receipt_path) { %>
+      <a href="/admin/topup-receipt/<%= t.id %>" target="_blank">
+        <% if (/\.pdf$/i.test(t.receipt_path)) { %>📄 PDF<% } else { %><img class="receipt-thumb" src="/admin/topup-receipt/<%= t.id %>" alt="chek"><% } %>
+      </a>
+    <% } else { %><span class="muted small">—</span><% } %>
+  </td>
+  <td>
+    <% if (t.status === 'pending') { %>
+      <div class="actions">
+        <form class="inline" method="post" action="/admin/topups/<%= t.id %>/approve"><button class="btn sm green">✓ Tasdiqlash</button></form>
+        <form class="inline" method="post" action="/admin/topups/<%= t.id %>/reject" onsubmit="const r=prompt('Rad etish sababi:');if(r===null)return false;this.note.value=r;">
+          <input type="hidden" name="note"><button class="btn sm red">✕ Rad</button>
+        </form>
+      </div>
+    <% } else if (t.status === 'approved') { %><span class="badge green">Tasdiqlangan</span>
+    <% } else { %><span class="badge red">Rad etilgan</span><% if (t.admin_note) { %><div class="muted small"><%= t.admin_note %></div><% } %><% } %>
+  </td>
+</tr>

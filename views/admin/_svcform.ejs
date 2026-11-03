@@ -1,0 +1,17 @@
+<div class="cols">
+  <div><label>Nomi</label><input name="name" required value="<%= s.name || '' %>" placeholder="Masalan: @shop_bot"></div>
+  <div><label>Turi</label>
+    <select name="type">
+      <option value="bot" <%= s.type !== 'sayt' ? 'selected' : '' %>>🤖 Telegram bot</option>
+      <option value="sayt" <%= s.type === 'sayt' ? 'selected' : '' %>>🌐 Veb sayt</option>
+    </select>
+  </div>
+  <div><label>Oylik narx (so'm)</label><input name="price" type="number" min="0" step="1000" required value="<%= s.price ?? '' %>"></div>
+  <div><label>To'langan muddat (shu sanagacha)</label><input name="paid_until" type="date" required value="<%= s.paid_until %>"></div>
+</div>
+<details style="margin-top:14px">
+  <summary>⚙️ Avto to'xtatish / yoqish buyruqlari (VPS)</summary>
+  <p class="muted small">To'lov qilinmasa shu buyruq serverda bajariladi. Masalan: <code>pm2 stop shop_bot</code> / <code>pm2 start shop_bot</code> yoki sayt uchun <code>sudo systemctl stop shop-site</code>. Bo'sh qoldirsangiz faqat holat o'zgaradi.</p>
+  <label>To'xtatish buyrug'i</label><input name="stop_cmd" value="<%= s.stop_cmd || '' %>" placeholder="pm2 stop shop_bot">
+  <label>Yoqish buyrug'i</label><input name="start_cmd" value="<%= s.start_cmd || '' %>" placeholder="pm2 start shop_bot">
+</details>

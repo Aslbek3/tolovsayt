@@ -1,0 +1,114 @@
+<%- include('../partials/header') %>
+<a href="/admin/clients" class="small">← Mijozlar</a>
+<h1 style="margin-top:8px"><%= c.name %> <span class="muted small">+<%= c.phone %></span></h1>
+
+<div class="card row between">
+  <div>
+    <span class="muted small">Balans</span>
+    <div class="price" style="margin-top:2px"><%= u.money(c.balance) %></div>
+  </div>
+  <form class="inline" method="post" action="/admin/clients/<%= c.id %>/balance" onsubmit="return confirm('Balansni o\'zgartirasizmi?')">
+    <input name="amount" type="text" inputmode="numeric" placeholder="masalan 50000" style="width:160px" required>
+    <button name="direction" value="add" class="btn sm" title="Naqd yoki boshqa yo'l bilan qabul qilingan to'lovni balansga qo'shish">➕ Qo'shish</button>
+    <button name="direction" value="subtract" class="btn sm ghost" title="Balansdan ayirish (masalan noto'g'ri qo'shilganini tuzatish uchun)">➖ Ayirish</button>
+  </form>
+</div>
+
+<div class="card table-wrap">
+  <h2>Xizmatlari</h2>
+  <% if (!services.length) { %><p class="muted">Hali xizmat qo'shilmagan.</p><% } else { %>
+  <table>
+    <tr><th>Nomi</th><th>Narx</th><th>Muddat</th><th>Holat</th><th></th></tr>
+    <% services.forEach(s => { %>
+    <tr>
+      <td><a href="/admin/services/<%= s.id %>"><b><%= s.name %></b></a><div class="type"><%= s.type %></div></td>
+      <td><%= u.money(s.price) %></td>
+      <td>
+        <form class="inline" method="post" action="/admin/services/<%= s.id %>/set-date" onsubmit="return confirm('Muddat qo\'lda o\'zgartirilsinmi?')">
+          <input type="date" name="paid_until" value="<%= s.paid_until %>" style="width:150px">
+          <button class="btn sm ghost" title="Sanani to'g'ridan-to'g'ri qo'lda o'rnatish">Saqlash</button>
+        </form>
+      </td>
+      <td><%- include('../partials/badge', { s }) %></td>
+      <td><div class="actions">
+        <form class="inline" method="post" action="/admin/services/<%= s.id %>/extend">
+          <input type="hidden" name="record" value="1">
+          <select name="months" style="width:auto;padding:5px"><% [1,2,3,6,12].forEach(m => { %><option value="<%= m %>"><%= m %> oy</option><% }) %></select>
+          <button class="btn sm ghost" title="Naqd to'lov — to'lov sifatida yoziladi">+ Uzaytirish</button>
+        </form>
+      </div></td>
+    </tr>
+    <% }) %>
+  </table>
+  <% } %>
+</div>
+
+<div class="card">
+  <h2>+ Yangi xizmat (bot yoki sayt)</h2>
+  <form method="post" action="/admin/services">
+    <input type="hidden" name="client_id" value="<%= c.id %>">
+    <%- include('_svcform', { s: { paid_until: defaultDate } }) %>
+    <button class="btn" style="margin-top:14px">Qo'shish</button>
+  </form>
+</div>
+
+<div class="cols">
+  <div class="card">
+    <h2>Ma'lumotlarni tahrirlash</h2>
+    <form method="post" action="/admin/clients/<%= c.id %>">
+      <label>Ism</label><input name="name" required value="<%= c.name %>">
+      <label>Telefon</label><input name="phone" required value="<%= c.phone %>">
+      <label>Yangi parol (o'zgartirmasangiz bo'sh qoldiring)</label><input name="password" minlength="6">
+      <label>Izoh</label><input name="note" value="<%= c.note || '' %>">
+      <button class="btn full">Saqlash</button>
+    </form>
+    <form method="post" action="/admin/clients/<%= c.id %>/delete" onsubmit="return confirm('Mijoz va uning barcha xizmatlari o\'chirilsinmi?')">
+      <button class="btn sm red" style="margin-top:12px">Mijozni o'chirish</button>
+    </form>
+  </div>
+  <div class="card">
+    <h2>Telegram</h2>
+    <% if (c.tg_chat_id) { %>
+      <p><span class="badge green">Ulangan</span> <span class="muted small">chat id: <%= c.tg_chat_id %></span></p>
+      <form method="post" action="/admin/clients/<%= c.id %>/message">
+        <label>Mijozga xabar yuborish</label>
+        <textarea name="text" required></textarea>
+        <button class="btn full">Yuborish</button>
+      </form>
+      <form method="post" action="/admin/clients/<%= c.id %>/unlink-tg"><button class="btn sm ghost" style="margin-top:10px">Uzish</button></form>
+    <% } else { %>
+      <p class="muted">Mijoz hali Telegramni ulamagan. U saytga kirib "Telegramni ulash" tugmasini bosishi kerak.</p>
+    <% } %>
+  </div>
+</div>
+
+<div class="card table-wrap">
+  <h2>To'lovlar</h2>
+  <% if (!payments.length) { %><p class="muted">To'lovlar yo'q.</p><% } else { %>
+  <table>
+    <tr><th>Sana</th><th>Xizmat</th><th>Muddat</th><th>Summa</th><th>Holat</th></tr>
+    <% payments.forEach(p => { %>
+    <tr>
+      <td><%= p.created_at %></td><td><%= p.service_name %></td><td><%= p.months %> oy</td><td><%= u.money(p.amount) %></td>
+      <td><span class="badge <%= p.status === 'approved' ? 'green' : p.status === 'pending' ? 'amber' : 'red' %>"><%= { pending: 'Kutilmoqda', approved: 'Tasdiqlangan', rejected: 'Rad etilgan' }[p.status] %></span></td>
+    </tr>
+    <% }) %>
+  </table>
+  <% } %>
+</div>
+
+<div class="card table-wrap">
+  <h2>Hisobga pul qo'shish so'rovlari</h2>
+  <% if (!topups.length) { %><p class="muted">Hali so'rov yo'q.</p><% } else { %>
+  <table>
+    <tr><th>Sana</th><th>Summa</th><th>Holat</th></tr>
+    <% topups.forEach(t => { %>
+    <tr>
+      <td><%= t.created_at %></td><td><%= u.money(t.amount) %></td>
+      <td><span class="badge <%= t.status === 'approved' ? 'green' : t.status === 'pending' ? 'amber' : 'red' %>"><%= { pending: 'Kutilmoqda', approved: 'Tasdiqlangan', rejected: 'Rad etilgan' }[t.status] %></span></td>
+    </tr>
+    <% }) %>
+  </table>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

@@ -1,0 +1,17 @@
+<%- include('../partials/header') %>
+<h1>To'lovlar</h1>
+<div class="row" style="margin-bottom:12px">
+  <a class="btn sm <%= !status ? '' : 'ghost' %>" href="/admin/payments">Hammasi</a>
+  <a class="btn sm <%= status === 'pending' ? '' : 'ghost' %>" href="?status=pending">Kutilmoqda</a>
+  <a class="btn sm <%= status === 'approved' ? '' : 'ghost' %>" href="?status=approved">Tasdiqlangan</a>
+  <a class="btn sm <%= status === 'rejected' ? '' : 'ghost' %>" href="?status=rejected">Rad etilgan</a>
+</div>
+<div class="card table-wrap">
+  <% if (!payments.length) { %><p class="muted">To'lovlar yo'q.</p><% } else { %>
+  <table>
+    <tr><th>#</th><th>Mijoz</th><th>Xizmat</th><th>Summa</th><th>Chek</th><th>Holat</th></tr>
+    <% payments.forEach(p => { %><%- include('_payrow', { p }) %><% }) %>
+  </table>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

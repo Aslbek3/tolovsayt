@@ -1,0 +1,24 @@
+<tr>
+  <td>#<%= p.id %><div class="muted small"><%= p.created_at %></div></td>
+  <td><a href="/admin/clients/<%= p.client_id %>"><%= p.client_name %></a><div class="muted small">+<%= p.phone %></div></td>
+  <td><%= p.service_name %><div class="muted small"><%= p.months %> oy</div></td>
+  <td><b><%= u.money(p.amount) %></b><% if (p.comment) { %><div class="muted small"><%= p.comment %></div><% } %></td>
+  <td>
+    <% if (p.receipt_path) { %>
+      <a href="/admin/receipt/<%= p.id %>" target="_blank">
+        <% if (/\.pdf$/i.test(p.receipt_path)) { %>📄 PDF<% } else { %><img class="receipt-thumb" src="/admin/receipt/<%= p.id %>" alt="chek"><% } %>
+      </a>
+    <% } else { %><span class="muted small">—</span><% } %>
+  </td>
+  <td>
+    <% if (p.status === 'pending') { %>
+      <div class="actions">
+        <form class="inline" method="post" action="/admin/payments/<%= p.id %>/approve"><button class="btn sm green">✓ Tasdiqlash</button></form>
+        <form class="inline" method="post" action="/admin/payments/<%= p.id %>/reject" onsubmit="const r=prompt('Rad etish sababi:');if(r===null)return false;this.note.value=r;">
+          <input type="hidden" name="note"><button class="btn sm red">✕ Rad</button>
+        </form>
+      </div>
+    <% } else if (p.status === 'approved') { %><span class="badge green">Tasdiqlangan</span>
+    <% } else { %><span class="badge red">Rad etilgan</span><% if (p.admin_note) { %><div class="muted small"><%= p.admin_note %></div><% } %><% } %>
+  </td>
+</tr>

@@ -1,0 +1,17 @@
+<%- include('../partials/header') %>
+<div class="card narrow login">
+  <div class="center">
+    <div class="logo" style="margin:0 auto 10px;width:44px;height:44px;font-size:22px">₿</div>
+    <h1><%= settings.site_name %></h1>
+    <p class="muted">Bot va saytlaringiz uchun server to'lovlari</p>
+  </div>
+  <form method="post" action="/login">
+    <label>Telefon raqam</label>
+    <input name="phone" type="tel" placeholder="+998 90 123 45 67" required autofocus>
+    <label>Parol</label>
+    <input name="password" type="password" required>
+    <button class="btn full">Kirish</button>
+  </form>
+  <p class="muted small center">Login va parolni admin beradi.</p>
+</div>
+<%- include('../partials/footer') %>

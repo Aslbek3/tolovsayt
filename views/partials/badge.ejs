@@ -1,0 +1,5 @@
+<% const _l = u.daysLeft(s.paid_until); %>
+<% if (s.status === 'suspended') { %><span class="badge red">To'xtatilgan</span>
+<% } else if (_l < 0) { %><span class="badge red"><%= -_l %> kun o'tdi</span>
+<% } else if (_l <= 3) { %><span class="badge amber"><%= _l === 0 ? 'Bugun' : _l + ' kun qoldi' %></span>
+<% } else { %><span class="badge green"><%= _l %> kun qoldi</span><% } %>

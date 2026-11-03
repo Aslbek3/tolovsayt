@@ -1,0 +1,39 @@
+<%- include('../partials/header') %>
+<a href="/admin/clients/<%= service.client_id %>" class="small">← <%= service.client_name %></a>
+<div class="row between" style="margin-top:8px">
+  <h1><%= service.name %> <%- include('../partials/badge', { s: service }) %></h1>
+  <div class="row">
+    <% if (service.status === 'active') { %>
+      <form method="post" action="/admin/services/<%= service.id %>/suspend" onsubmit="return confirm('To\'xtatilsinmi?')"><button class="btn red">⛔ To'xtatish</button></form>
+    <% } else { %>
+      <form method="post" action="/admin/services/<%= service.id %>/resume"><button class="btn green">▶ Yoqish</button></form>
+    <% } %>
+  </div>
+</div>
+
+<div class="card">
+  <form method="post" action="/admin/services/<%= service.id %>">
+    <%- include('_svcform', { s: service }) %>
+    <button class="btn" style="margin-top:14px">Saqlash</button>
+  </form>
+</div>
+
+<div class="cols">
+  <div class="card">
+    <h2>Muddatni uzaytirish</h2>
+    <form method="post" action="/admin/services/<%= service.id %>/extend">
+      <label>Necha oy</label>
+      <select name="months"><% [1,2,3,6,12].forEach(m => { %><option value="<%= m %>"><%= m %> oy</option><% }) %></select>
+      <label><input type="checkbox" name="record" value="1" checked style="width:auto"> To'lov sifatida yozib qo'yish (naqd to'lov)</label>
+      <button class="btn full">Uzaytirish</button>
+    </form>
+  </div>
+  <div class="card">
+    <h2>Oxirgi buyruq natijasi</h2>
+    <pre><%= service.last_cmd_output || "Hali buyruq bajarilmagan" %></pre>
+    <form method="post" action="/admin/services/<%= service.id %>/delete" onsubmit="return confirm('Xizmat o\'chirilsinmi?')">
+      <button class="btn sm red">Xizmatni o'chirish</button>
+    </form>
+  </div>
+</div>
+<%- include('../partials/footer') %>

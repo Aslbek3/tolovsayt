@@ -1,0 +1,43 @@
+<%- include('../partials/header') %>
+<h1>Mijozlar</h1>
+<div class="cols wide">
+  <div class="card table-wrap">
+    <form class="row" method="get" style="margin-bottom:10px">
+      <input name="q" value="<%= q %>" placeholder="Ism yoki telefon bo'yicha qidirish" style="flex:1">
+      <button class="btn ghost">Qidirish</button>
+    </form>
+    <% if (!clients.length) { %><p class="muted">Mijozlar yo'q.</p><% } else { %>
+    <form method="post" action="/admin/clients/message-bulk" onsubmit="return confirm('Tanlangan mijozlarga xabar yuborilsinmi?')">
+    <table>
+      <tr><th></th><th>Ism</th><th>Telefon</th><th>Xizmatlar</th><th>Yaqin muddat</th><th>TG</th></tr>
+      <% clients.forEach(c => { %>
+      <tr>
+        <td><input type="checkbox" name="client_ids" value="<%= c.id %>" style="width:auto" <%= !c.tg_chat_id ? 'disabled title="Telegram ulanmagan"' : '' %>></td>
+        <td><a href="/admin/clients/<%= c.id %>"><b><%= c.name %></b></a></td>
+        <td>+<%= c.phone %></td>
+        <td><%= c.svc_count %><% if (c.suspended) { %> <span class="badge red"><%= c.suspended %> to'xt.</span><% } %></td>
+        <td><%= c.next_due ? u.fmtDate(c.next_due) : '—' %></td>
+        <td><%= c.tg_chat_id ? '✅' : '—' %></td>
+      </tr>
+      <% }) %>
+    </table>
+    <div style="margin-top:12px">
+      <label>Tanlangan mijozlarga to'lov haqida xabar</label>
+      <textarea name="text" placeholder="Masalan: Hurmatli mijoz, to'lov muddatingiz yaqinlashdi..." required></textarea>
+      <button class="btn sm" style="margin-top:6px">📢 Tanlanganlarga yuborish</button>
+    </div>
+    </form>
+    <% } %>
+  </div>
+  <div class="card">
+    <h2>+ Yangi mijoz</h2>
+    <form method="post" action="/admin/clients">
+      <label>Ism</label><input name="name" required>
+      <label>Telefon</label><input name="phone" type="tel" placeholder="90 123 45 67" required>
+      <label>Parol (mijozga berasiz)</label><input name="password" minlength="6" required value="<%= Math.random().toString(36).slice(2, 10) %>">
+      <label>Izoh</label><input name="note">
+      <button class="btn full">Qo'shish</button>
+    </form>
+  </div>
+</div>
+<%- include('../partials/footer') %>

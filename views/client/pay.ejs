@@ -1,0 +1,55 @@
+<%- include('../partials/header') %>
+<a href="/" class="small">← Orqaga</a>
+<div class="card narrow" style="max-width:520px;margin-top:10px">
+  <span class="type"><%= service.type === 'sayt' ? '🌐 Veb sayt' : '🤖 Telegram bot' %></span>
+  <h1 style="margin-top:4px"><%= service.name %></h1>
+  <p class="muted">Hozirgi muddat: <b><%= u.fmtDate(service.paid_until) %></b> · <%- include('../partials/badge', { s: service }) %></p>
+
+  <% if (balance > 0) { %>
+  <div class="paybox" style="margin-bottom:16px">
+    <div class="muted small">Balansingiz</div>
+    <div class="total"><%= u.money(balance) %></div>
+    <form method="post" action="/pay/<%= service.id %>/balance" style="margin-top:10px">
+      <select name="months">
+        <% [1,2,3,6,12].forEach(m => { %><option value="<%= m %>" <%= balance < service.price * m ? 'disabled' : '' %>><%= m %> oy — <%= u.money(service.price * m) %></option><% }) %>
+      </select>
+      <button class="btn full" <%= balance < service.price ? 'disabled' : '' %>>💰 Balansdan to'lash</button>
+    </form>
+  </div>
+  <p class="center muted small">— yoki chek yuklab to'lang —</p>
+  <% } %>
+
+  <form method="post" action="/pay/<%= service.id %>" enctype="multipart/form-data">
+    <label>Necha oyga to'laysiz?</label>
+    <select name="months" id="months">
+      <% [1,2,3,6,12].forEach(m => { %><option value="<%= m %>"><%= m %> oy — <%= u.money(service.price * m) %></option><% }) %>
+    </select>
+
+    <div class="paybox">
+      <div class="muted small">To'lanadigan summa</div>
+      <div class="total" id="total"><%= u.money(service.price) %></div>
+      <hr style="border:0;border-top:1px solid var(--line);margin:12px 0">
+      <div class="muted small">Quyidagi kartaga o'tkazing (<%= settings.card_bank %>)</div>
+      <div class="row between">
+        <div class="card-num" id="card"><%= settings.card_number %></div>
+        <button type="button" class="btn sm ghost" onclick="navigator.clipboard.writeText(document.getElementById('card').innerText.replace(/\s/g,''));this.innerText='Nusxalandi ✓'">Nusxalash</button>
+      </div>
+      <div><%= settings.card_holder %></div>
+    </div>
+    <p class="muted small"><%= settings.pay_note %></p>
+
+    <label>Chek rasmi (skrinshot yoki PDF)</label>
+    <input type="file" name="receipt" accept="image/*,.pdf" required>
+    <label>Izoh (ixtiyoriy)</label>
+    <input name="comment" placeholder="Masalan: Payme orqali to'ladim">
+    <button class="btn full">Chekni yuborish</button>
+  </form>
+</div>
+<script>
+  const price = <%= service.price %>;
+  const fmt = n => n.toLocaleString('ru-RU').replace(/ /g,' ') + " so'm";
+  document.getElementById('months').addEventListener('change', e => {
+    document.getElementById('total').innerText = fmt(price * Number(e.target.value));
+  });
+</script>
+<%- include('../partials/footer') %>
