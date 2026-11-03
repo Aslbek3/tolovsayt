@@ -1,0 +1,13 @@
+<%# `settings` alohida uzatilmaydi — u res.locals orqali barcha render'larga
+    avtomatik keladi va include() shu tashqi doirani meros qiladi (header.ejs
+    da ham xuddi shunday ishlatilgan). %>
+<div class="bank-card">
+  <button type="button" class="cp" data-copy="<%= settings.card_number %>">Nusxalash</button>
+  <span class="chip" aria-hidden="true"></span>
+  <div class="lbl"><%= settings.card_bank %> kartasi</div>
+  <div class="num"><%= settings.card_number %></div>
+  <div class="foot">
+    <div class="who"><%= settings.card_holder %></div>
+    <div class="bank"><%= settings.card_bank %></div>
+  </div>
+</div>

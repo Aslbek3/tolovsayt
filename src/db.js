@@ -86,6 +86,8 @@ const defaults = {
   grace_days: '3',
   remind_days: '5,3,1,0',
   pay_note: "To'lovni amalga oshirgach, chek (skrinshot) rasmini yuklang. Admin tasdiqlagach muddat avtomatik uzayadi.",
+  // Mijoz sahifalarida "admin bilan bog'lanish" havolasi uchun
+  admin_contact: '@Coder_uzzz',
 };
 const insDef = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
 for (const [k, v] of Object.entries(defaults)) insDef.run(k, v);

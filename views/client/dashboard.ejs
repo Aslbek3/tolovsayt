@@ -1,38 +1,79 @@
-<%- include('../partials/header') %>
-<div class="row between">
-  <h1>Assalomu alaykum, <%= me.name %>!</h1>
+<%- include('../partials/chead') %>
+<%
+  const needAction = services.filter(s => s.status === 'suspended' || u.daysLeft(s.paid_until) <= 7);
+  const fine = services.filter(s => !(s.status === 'suspended' || u.daysLeft(s.paid_until) <= 7));
+%>
+
+<div class="c-head">
+  <div>
+    <div class="hi">Assalomu alaykum</div>
+    <div class="who"><%= me.name %></div>
+  </div>
+  <a class="icon-btn" href="/profile" title="Profil" aria-label="Profil">⚙️</a>
 </div>
 
-<% if (!me.tg_chat_id && botUsername) { %>
-  <div class="card row between">
-    <div>
-      <b>🔔 Telegram eslatmalarni yoqing</b>
-      <div class="muted small">To'lov muddati yaqinlashganda va to'lov tasdiqlanganda Telegramga xabar keladi.</div>
+<div class="c-balance">
+  <div class="lbl">Balans</div>
+  <div class="amt"><%= u.money(balance) %></div>
+  <div class="sub"><%= balance > 0 ? "Xizmatlarga chek yuklamasdan to'lashingiz mumkin" : "Oldindan pul kiritib qo'ysangiz, to'lov bir bosishda bo'ladi" %></div>
+  <div class="acts">
+    <a class="btn" href="/topup">+ Hisobni to'ldirish</a>
+    <a class="btn ghost" href="/payments">Tarix</a>
+  </div>
+</div>
+
+<% if (rejected) { %>
+  <div class="c-notice bad">
+    <span class="ic">⚠️</span>
+    <div class="bd">
+      <b>To'lovingiz rad etildi</b>
+      <%= rejected.service_name %> — <%= u.money(rejected.amount) %>
+      <% if (rejected.admin_note) { %><div style="margin-top:4px">Sabab: <%= rejected.admin_note %></div><% } %>
+      <a class="btn red" href="/pay/<%= rejected.service_id %>">Qaytadan to'lash</a>
     </div>
-    <form method="post" action="/telegram-link" target="_blank"><button class="btn">Telegramni ulash</button></form>
+  </div>
+<% } %>
+
+<% if (!me.tg_chat_id && botUsername) { %>
+  <div class="c-notice info">
+    <span class="ic">🔔</span>
+    <div class="bd">
+      <b>Telegram eslatmalarini yoqing</b>
+      Muddat yaqinlashganda va to'lov tasdiqlanganda darhol xabar keladi.
+      <form method="post" action="/telegram-link" target="_blank" style="margin:0">
+        <button class="btn" type="submit">Telegramni ulash</button>
+      </form>
+    </div>
   </div>
 <% } %>
 
 <% if (!services.length) { %>
-  <div class="card center muted">Sizda hali xizmat yo'q.</div>
-<% } %>
-
-<div class="grid">
-<% services.forEach(s => { %>
-  <div class="card svc">
-    <div class="row between">
-      <span class="type"><%= s.type === 'sayt' ? '🌐 Veb sayt' : '🤖 Telegram bot' %></span>
-      <%- include('../partials/badge', { s }) %>
-    </div>
-    <h3 style="margin-top:8px"><%= s.name %></h3>
-    <div class="price"><%= u.money(s.price) %> <span class="muted small">/ oy</span></div>
-    <div class="meta">To'langan muddat: <b><%= u.fmtDate(s.paid_until) %></b> gacha</div>
-    <% if (pending.includes(s.id)) { %>
-      <button class="btn ghost full" disabled>⏳ To'lov tekshirilmoqda</button>
-    <% } else { %>
-      <a class="btn full" href="/pay/<%= s.id %>">To'lash</a>
+  <div class="c-empty">
+    <span class="em">📦</span>
+    <b>Sizda hali xizmat yo'q</b>
+    Bot yoki sayt xizmati biriktirilgach, u shu yerda ko'rinadi.
+    <% if (settings.admin_contact) { %>
+      <a class="btn ghost" href="https://t.me/<%= settings.admin_contact.replace('@', '') %>" target="_blank" rel="noopener">Admin bilan bog'lanish</a>
     <% } %>
   </div>
-<% }) %>
-</div>
-<%- include('../partials/footer') %>
+<% } %>
+
+<% if (needAction.length) { %>
+  <div class="c-section">
+    <div class="cap urgent">To'lash kerak <span class="count"><%= needAction.length %></span></div>
+    <% needAction.forEach(s => { %>
+      <%- include('../partials/svccard', { s: s, pend: pendingByService[s.id] || null }) %>
+    <% }) %>
+  </div>
+<% } %>
+
+<% if (fine.length) { %>
+  <div class="c-section">
+    <div class="cap">Faol <span class="count"><%= fine.length %></span></div>
+    <% fine.forEach(s => { %>
+      <%- include('../partials/svccard', { s: s, pend: pendingByService[s.id] || null }) %>
+    <% }) %>
+  </div>
+<% } %>
+
+<%- include('../partials/cfoot') %>

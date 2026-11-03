@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <!-- viewport-fit=cover — iPhone'da env(safe-area-inset-*) ishlashi uchun shart -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#3758f9" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#161922" media="(prefers-color-scheme: dark)">
+  <title><%= title %> — <%= settings.site_name %></title>
+  <%# Ichiga joylashtirilgan ikonka — brauzer /favicon.ico so'rab 404 olmasligi uchun %>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233758f9'/%3E%3Crect x='6' y='10' width='20' height='13' rx='2.5' fill='%23fff'/%3E%3Crect x='6' y='13.5' width='20' height='3' fill='%233758f9'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/client.css">
+</head>
+<body class="c-app">
+<% if (typeof me !== 'undefined' && me) { %>
+  <header class="top c-topnav">
+    <a class="brand" href="/"><span class="logo">₿</span> <%= settings.site_name %></a>
+    <nav>
+      <a href="/" class="<%= path === '/' ? 'on' : '' %>">Asosiy</a>
+      <a href="/payments" class="<%= path.startsWith('/payments') ? 'on' : '' %>">To'lovlar</a>
+      <a href="/profile" class="<%= path.startsWith('/profile') ? 'on' : '' %>">Profil</a>
+      <form method="post" action="/logout"><button class="link">Chiqish</button></form>
+    </nav>
+  </header>
+<% } %>
+<main class="c-wrap<%= typeof flow !== 'undefined' && flow ? ' flow' : '' %>">
+<% if (flash) { %><div class="alert <%= flash.type %>"><%= flash.msg %></div><% } %>

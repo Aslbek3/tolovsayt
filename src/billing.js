@@ -151,12 +151,12 @@ async function dailyCheck() {
     if (s.status === 'active') {
       if (remindDays.includes(left) && logOnce(s.id, 'remind_' + left, s.paid_until)) {
         const when = left === 0 ? '<b>bugun</b>' : `<b>${left} kundan keyin</b> (${fmtDate(s.paid_until)})`;
-        const text = `🔔 Eslatma: <b>${esc(s.name)}</b> server to'lovi muddati ${when} tugaydi.\n💰 Oylik: ${money(s.price)}` + (site ? '' : `\n\nTo'lash: ${site}`);
+        const text = `🔔 Eslatma: <b>${esc(s.name)}</b> server to'lovi muddati ${when} tugaydi.\n💰 Oylik: ${money(s.price)}`;
         tg.send(s.tg_chat_id, text, payButton(site, s.id));
         if (left <= 1) soonForAdmin.push(s);
       }
       if (left < 0 && -left <= grace && logOnce(s.id, 'overdue', today())) {
-        const text = `⚠️ <b>${esc(s.name)}</b> to'lov muddati ${-left} kun o'tdi!\n${grace + left + 1} kundan so'ng xizmat avtomatik to'xtatiladi.` + (site ? '' : `\n\nTo'lash: ${site}`);
+        const text = `⚠️ <b>${esc(s.name)}</b> to'lov muddati ${-left} kun o'tdi!\n${grace + left + 1} kundan so'ng xizmat avtomatik to'xtatiladi.`;
         tg.send(s.tg_chat_id, text, payButton(site, s.id));
       }
       if (left < -grace) {

@@ -1,24 +1,48 @@
-<%- include('../partials/header') %>
-<h1>To'lovlar tarixi</h1>
-<div class="card table-wrap">
-<% if (!payments.length) { %><p class="muted center">Hali to'lovlar yo'q.</p><% } else { %>
-  <table>
-    <tr><th>Sana</th><th>Xizmat</th><th>Muddat</th><th>Summa</th><th>Holat</th></tr>
-    <% payments.forEach(p => { %>
-    <tr>
-      <td><%= u.fmtDate(p.created_at) %></td>
-      <td><%= p.service_name %></td>
-      <td><%= p.months %> oy</td>
-      <td><%= u.money(p.amount) %></td>
-      <td>
-        <% if (p.status === 'pending') { %><span class="badge amber">Tekshirilmoqda</span>
-        <% } else if (p.status === 'approved') { %><span class="badge green">Tasdiqlandi</span>
-        <% } else { %><span class="badge red">Rad etildi</span><% } %>
-        <% if (p.status === 'rejected' && p.admin_note) { %><div class="muted small"><%= p.admin_note %></div><% } %>
-      </td>
-    </tr>
-    <% }) %>
-  </table>
-<% } %>
+<%- include('../partials/chead') %>
+<%
+  const badgeOf = { pending: ['amber', 'Tekshirilmoqda'], approved: ['green', 'Tasdiqlandi'], rejected: ['red', 'Rad etildi'] };
+%>
+
+<div class="c-head">
+  <div>
+    <div class="hi">Tarix</div>
+    <div class="who">To'lovlar</div>
+  </div>
+  <a class="icon-btn" href="/topup" title="Hisobni to'ldirish" aria-label="Hisobni to'ldirish">＋</a>
 </div>
-<%- include('../partials/footer') %>
+
+<% if (!history.length) { %>
+  <div class="c-empty">
+    <span class="em">🧾</span>
+    <b>Hali to'lov yo'q</b>
+    To'lov qilganingizdan keyin barcha cheklar shu yerda saqlanadi.
+    <a class="btn ghost" href="/">Xizmatlarimga qaytish</a>
+  </div>
+<% } else { %>
+  <div class="c-list">
+    <% history.forEach(h => { %>
+      <% const b = badgeOf[h.status] || ['gray', h.status]; %>
+      <div class="c-item">
+        <div class="ico"><%= h.kind === 'topup' ? '💰' : (h.type === 'sayt' ? '🌐' : '🤖') %></div>
+        <div class="bd">
+          <b><%= h.kind === 'topup' ? "Hisobni to'ldirish" : h.service_name %></b>
+          <div class="sub">
+            <%= u.fmtDate(h.created_at) %>
+            <% if (h.kind === 'payment') { %> · <%= h.months %> oy<% } %>
+            <% if (h.comment === "Balansdan to'landi") { %> · balansdan<% } %>
+          </div>
+          <% if (h.status === 'rejected' && h.admin_note) { %>
+            <div class="why">Sabab: <%= h.admin_note %></div>
+          <% } %>
+        </div>
+        <div class="rt">
+          <div class="amt"><%= u.money(h.amount) %></div>
+          <span class="badge <%= b[0] %>"><%= b[1] %></span>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+  <p class="muted small center" style="margin-top:12px">Oxirgi <%= history.length %> yozuv ko'rsatilgan</p>
+<% } %>
+
+<%- include('../partials/cfoot') %>

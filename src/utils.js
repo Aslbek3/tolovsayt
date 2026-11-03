@@ -52,8 +52,17 @@ function normPhone(p) {
   return digits;
 }
 
+// Bazada raqam faqat raqamlardan iborat saqlanadi (998901234567).
+// Ko'rsatish uchun o'qishga qulay shaklga keltiramiz: +998 90 123 45 67
+function fmtPhone(p) {
+  const d = String(p || '').replace(/\D/g, '');
+  const m = d.match(/^998(\d{2})(\d{3})(\d{2})(\d{2})$/);
+  if (m) return `+998 ${m[1]} ${m[2]} ${m[3]} ${m[4]}`;
+  return d ? '+' + d : '';
+}
+
 function esc(s) {
   return String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 }
 
-module.exports = { today, fmtDate, addMonths, daysBetween, daysLeft, money, token, normPhone, esc };
+module.exports = { today, fmtDate, addMonths, daysBetween, daysLeft, money, token, normPhone, fmtPhone, esc };

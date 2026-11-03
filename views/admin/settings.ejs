@@ -12,6 +12,7 @@
   <div class="card">
     <h2>⏰ Eslatma va to'xtatish</h2>
     <label>Sayt nomi</label><input name="site_name" value="<%= s.site_name %>">
+    <label>Admin Telegram username (mijozlar bog'lanishi uchun)</label><input name="admin_contact" value="<%= s.admin_contact %>" placeholder="@username">
     <label>Necha kun oldin eslatilsin (vergul bilan)</label><input name="remind_days" value="<%= s.remind_days %>">
     <p class="muted small">Masalan <code>5,3,1,0</code> — muddat tugashidan 5, 3, 1 kun oldin va tugagan kuni Telegramga eslatma.</p>
     <label>Muddat o'tgach necha kun kutib, keyin to'xtatilsin</label><input name="grace_days" type="number" min="0" value="<%= s.grace_days %>">

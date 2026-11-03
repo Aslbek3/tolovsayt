@@ -309,7 +309,7 @@ router.post('/topups/:id/reject', async (req, res) => {
 router.get('/settings', (req, res) => res.render('admin/settings', { title: 'Sozlamalar', s: getSettings() }));
 
 router.post('/settings', (req, res) => {
-  for (const k of ['site_name', 'card_number', 'card_holder', 'card_bank', 'grace_days', 'remind_days', 'pay_note']) {
+  for (const k of ['site_name', 'card_number', 'card_holder', 'card_bank', 'grace_days', 'remind_days', 'pay_note', 'admin_contact']) {
     if (k in req.body) setSetting(k, String(req.body[k]).trim());
   }
   req.flash('success', 'Sozlamalar saqlandi');

@@ -4,31 +4,28 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><%= title %> — <%= settings.site_name %></title>
+  <%# Ichiga joylashtirilgan ikonka — brauzer /favicon.ico so'rab 404 olmasligi uchun %>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233758f9'/%3E%3Crect x='6' y='10' width='20' height='13' rx='2.5' fill='%23fff'/%3E%3Crect x='6' y='13.5' width='20' height='3' fill='%233758f9'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-<% if (typeof admin !== 'undefined' && admin && !path.startsWith('/login')) { %>
+<%
+  // `path` ikki xil ko'rinishda kelishi mumkin: app.js dagi umumiy middleware to'liq
+  // yo'lni qo'yadi ('/admin/clients'), admin router esa mount prefiksisiz ('/clients').
+  // Shuning uchun ikkalasini bitta '/admin/...' shakliga keltiramiz.
+  const ap = ('/admin' + path).replace(/^\/admin\/admin(\/|$)/, '/admin$1').replace(/\/+$/, '') || '/admin';
+%>
+<% if (typeof admin !== 'undefined' && admin && ap !== '/admin/login') { %>
   <header class="top">
     <a class="brand" href="/admin"><span class="logo">₿</span> <%= settings.site_name %> <small>admin</small></a>
     <nav>
-      <a href="/admin" class="<%= path === '/' ? 'on' : '' %>">Panel</a>
-      <a href="/admin/clients" class="<%= path.startsWith('/clients') ? 'on' : '' %>">Mijozlar</a>
-      <a href="/admin/services" class="<%= path.startsWith('/services') ? 'on' : '' %>">Xizmatlar</a>
-      <a href="/admin/payments" class="<%= path.startsWith('/payments') ? 'on' : '' %>">To'lovlar</a>
-      <a href="/admin/topups" class="<%= path.startsWith('/topups') ? 'on' : '' %>">Pul qo'shish</a>
-      <a href="/admin/settings" class="<%= path.startsWith('/settings') ? 'on' : '' %>">Sozlamalar</a>
+      <a href="/admin" class="<%= ap === '/admin' ? 'on' : '' %>">Panel</a>
+      <a href="/admin/clients" class="<%= ap.startsWith('/admin/clients') ? 'on' : '' %>">Mijozlar</a>
+      <a href="/admin/services" class="<%= ap.startsWith('/admin/services') ? 'on' : '' %>">Xizmatlar</a>
+      <a href="/admin/payments" class="<%= ap.startsWith('/admin/payments') ? 'on' : '' %>">To'lovlar</a>
+      <a href="/admin/topups" class="<%= ap.startsWith('/admin/topups') ? 'on' : '' %>">Pul qo'shish</a>
+      <a href="/admin/settings" class="<%= ap.startsWith('/admin/settings') ? 'on' : '' %>">Sozlamalar</a>
       <form method="post" action="/admin/logout"><button class="link">Chiqish</button></form>
-    </nav>
-  </header>
-<% } else if (typeof me !== 'undefined' && me) { %>
-  <header class="top">
-    <a class="brand" href="/"><span class="logo">₿</span> <%= settings.site_name %></a>
-    <nav>
-      <a href="/" class="<%= path === '/' ? 'on' : '' %>">Xizmatlarim</a>
-      <a href="/hisobim" class="<%= path.startsWith('/hisobim') ? 'on' : '' %>">Hisobim</a>
-      <a href="/payments" class="<%= path.startsWith('/payments') ? 'on' : '' %>">To'lovlar</a>
-      <a href="/profile" class="<%= path.startsWith('/profile') ? 'on' : '' %>">Profil</a>
-      <form method="post" action="/logout"><button class="link">Chiqish</button></form>
     </nav>
   </header>
 <% } %>

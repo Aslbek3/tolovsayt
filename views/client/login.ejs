@@ -1,17 +1,30 @@
-<%- include('../partials/header') %>
-<div class="card narrow login">
-  <div class="center">
-    <div class="logo" style="margin:0 auto 10px;width:44px;height:44px;font-size:22px">₿</div>
-    <h1><%= settings.site_name %></h1>
-    <p class="muted">Bot va saytlaringiz uchun server to'lovlari</p>
+<%- include('../partials/chead') %>
+
+<div class="c-login">
+  <div class="mark">₿</div>
+  <h1><%= settings.site_name %></h1>
+  <p class="tag">Bot va saytlaringiz uchun server to'lovlari</p>
+
+  <div class="box">
+    <form method="post" action="/login" data-once="Kirilmoqda…">
+      <label for="phone">Telefon raqam</label>
+      <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="username"
+             placeholder="+998 90 123 45 67" required autofocus>
+
+      <label for="password">Parol</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+
+      <button class="btn full" type="submit">Kirish</button>
+    </form>
   </div>
-  <form method="post" action="/login">
-    <label>Telefon raqam</label>
-    <input name="phone" type="tel" placeholder="+998 90 123 45 67" required autofocus>
-    <label>Parol</label>
-    <input name="password" type="password" required>
-    <button class="btn full">Kirish</button>
-  </form>
-  <p class="muted small center">Login va parolni admin beradi.</p>
+
+  <p class="help">
+    Login va parolni admin beradi.<br>
+    <% if (settings.admin_contact) { %>
+      Parolni esdan chiqardingizmi?
+      <a href="https://t.me/<%= settings.admin_contact.replace('@', '') %>" target="_blank" rel="noopener"><%= settings.admin_contact %></a> ga yozing.
+    <% } %>
+  </p>
 </div>
-<%- include('../partials/footer') %>
+
+<%- include('../partials/cfoot') %>

@@ -1,0 +1,438 @@
+/* ==========================================================================
+   Mijoz kabineti — mobil uchun birinchi navbatda (to'lov ilovasi uslubi)
+   Baza: style.css
+   ========================================================================== */
+
+body.c-app {
+  background: var(--bg);
+  /* Pastdagi tab panel va iPhone home-bar uchun joy */
+  padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+}
+
+.c-wrap { max-width: 560px; margin: 0 auto; padding: 14px 16px 24px; }
+.c-wrap.flow { padding-top: 6px; }
+
+/* ------------------------------------------------------------- sarlavha */
+
+.c-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 6px 0 14px;
+}
+.c-head .hi { font-size: 13px; color: var(--muted); font-weight: 500; }
+.c-head .who { font-size: 19px; font-weight: 700; letter-spacing: -.02em; margin-top: 1px; }
+
+.icon-btn {
+  width: 42px; height: 42px; flex: none;
+  display: grid; place-items: center;
+  border-radius: var(--r-sm); border: 1px solid var(--line);
+  background: var(--surface); color: var(--text-2);
+  font-size: 17px; cursor: pointer; text-decoration: none;
+  box-shadow: var(--shadow-1);
+}
+.icon-btn:hover { background: var(--surface-2); }
+
+/* Oqim sahifalari (to'lov, hisob to'ldirish) uchun orqaga qaytish */
+.flow-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 4px 0 12px;
+}
+.flow-head .back {
+  width: 40px; height: 40px; flex: none;
+  display: grid; place-items: center;
+  border-radius: var(--r-sm); border: 1px solid var(--line);
+  background: var(--surface); color: var(--text);
+  font-size: 18px; box-shadow: var(--shadow-1);
+}
+.flow-head h1 { margin: 0; font-size: 18px; }
+
+/* --------------------------------------------------------- balans kartasi */
+
+/* Neytral karta — oldin to'liq rangli gradient edi, sun'iy va "2010-yillar"
+   taassurotini berardi. Endi oddiy sirt, urg'u faqat raqam va yorliq
+   matnida — real mablag' ko'rsatkichlari odatda shunday ko'rinadi. */
+.c-balance {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 18px;
+  box-shadow: var(--shadow-1);
+  margin-bottom: 18px;
+}
+.c-balance .lbl {
+  font-size: 11px; font-weight: 700; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--brand);
+}
+.c-balance .amt {
+  font-size: 32px; font-weight: 800; letter-spacing: -.03em;
+  margin: 5px 0 2px; font-variant-numeric: tabular-nums; color: var(--text);
+}
+.c-balance .sub { font-size: 13px; color: var(--muted); }
+.c-balance .acts { display: flex; gap: 8px; margin-top: 15px; }
+.c-balance .acts .btn { flex: 1; min-height: 42px; }
+
+/* --------------------------------------------------------------- bo'limlar */
+
+.c-section { margin-bottom: 18px; }
+.c-section > .cap {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 11px; font-weight: 700; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--muted);
+  margin: 0 2px 9px;
+}
+.c-section > .cap.urgent { color: var(--danger); }
+.c-section > .cap .count {
+  background: var(--surface-2); color: var(--muted);
+  border-radius: var(--r-pill); padding: 1px 7px; font-size: 11px; letter-spacing: 0;
+}
+.c-section > .cap.urgent .count { background: var(--danger-bg); color: var(--danger); }
+
+/* ------------------------------------------------------- xizmat kartasi */
+
+.c-svc {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 15px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow-1);
+  position: relative;
+  overflow: hidden;
+}
+/* Chegara neytral qoladi — holatni FAQAT chap chiziq bildiradi,
+   butun karta qizil/sariq ramkaga olinmaydi */
+.c-svc.is-urgent::before,
+.c-svc.is-soon::before {
+  content: ""; position: absolute; inset: 0 auto 0 0; width: 3px;
+}
+.c-svc.is-urgent::before { background: var(--danger); }
+.c-svc.is-soon::before { background: var(--warn); }
+
+.c-svc .hd { display: flex; align-items: flex-start; gap: 11px; }
+.c-svc .ico {
+  width: 38px; height: 38px; flex: none;
+  display: grid; place-items: center;
+  border-radius: 11px; background: var(--surface-2);
+  border: 1px solid var(--line); font-size: 18px;
+}
+/* Xizmat turi bo'yicha rang — hammasi bir xil kulrang bo'lmasin,
+   ro'yxatda ko'z ilib ajratish osonroq bo'lsin */
+.c-svc .ico.ico-bot { background: var(--brand-soft); border-color: var(--brand-line); }
+.c-svc .ico.ico-site { background: #e3f6f1; border-color: #b8e8dc; }
+@media (prefers-color-scheme: dark) {
+  .c-svc .ico.ico-site { background: #0f2e28; border-color: #1c4a40; }
+}
+.c-svc .nm { flex: 1; min-width: 0; }
+.c-svc .nm b {
+  display: block; font-size: 15.5px; font-weight: 650; letter-spacing: -.01em;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.c-svc .nm .sub { font-size: 13px; color: var(--muted); margin-top: 1px; }
+.c-svc .nm .sub b { display: inline; font-weight: 600; color: var(--text-2); font-size: 13px; }
+
+.c-svc .bar {
+  height: 5px; border-radius: var(--r-pill);
+  background: var(--surface-2); overflow: hidden; margin: 12px 0 9px;
+}
+.c-svc .bar i { display: block; height: 100%; border-radius: var(--r-pill); background: var(--ok); }
+.c-svc.is-soon .bar i { background: var(--warn); }
+.c-svc.is-urgent .bar i { background: var(--danger); }
+
+.c-svc .ft { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.c-svc .ft .when { font-size: 13px; color: var(--muted); }
+.c-svc .ft .when b { color: var(--text-2); font-weight: 600; }
+.c-svc .btn { min-height: 40px; padding: 9px 16px; font-size: 14px; }
+
+/* Tekshirilayotgan to'lov holati */
+.c-pending {
+  display: flex; align-items: center; gap: 9px;
+  background: var(--warn-bg); border: 1px solid var(--warn-line);
+  border-radius: var(--r-sm); padding: 9px 12px; margin-top: 11px;
+  font-size: 13px; color: var(--warn); font-weight: 500;
+}
+.c-pending .dot {
+  width: 7px; height: 7px; flex: none; border-radius: 50%;
+  background: var(--warn); animation: pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+.c-pending form { margin: 0 0 0 auto; }
+.c-pending .link-sm {
+  display: inline-flex; align-items: center;
+  /* Barmoq uchun yetarli baland bo'lsin — 28px juda kichik edi */
+  min-height: 40px; padding: 4px 8px;
+  background: none; border: 0; cursor: pointer;
+  color: var(--warn); font: inherit; font-size: 13px; font-weight: 600;
+  text-decoration: underline;
+}
+
+/* --------------------------------------------------------- ogohlantirish */
+
+/* Fon HAR DOIM neytral — faqat chap chiziq va sarlavha rangi holatni
+   bildiradi. Butun karta rang bilan to'ldirilmaydi (xizmat kartalari
+   bilan bir xil qoida). */
+.c-notice {
+  position: relative; overflow: hidden;
+  display: flex; gap: 11px; align-items: flex-start;
+  border-radius: var(--r); padding: 13px 15px 13px 18px; margin-bottom: 14px;
+  border: 1px solid var(--line); background: var(--surface);
+  box-shadow: var(--shadow-1);
+}
+.c-notice::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; }
+.c-notice.warn::before { background: var(--warn); }
+.c-notice.bad::before { background: var(--danger); }
+.c-notice.info::before { background: var(--brand); }
+.c-notice .ic { font-size: 17px; line-height: 1.3; flex: none; }
+/* Faqat sarlavha rangli bo'ladi, asosiy matn oddiy — butun blok bir rangda
+   bo'lsa muhim so'zlar ajralmay qoladi va o'qish qiyinlashadi */
+.c-notice .bd { flex: 1; min-width: 0; font-size: 13.5px; color: var(--text-2); }
+.c-notice .bd b { display: block; font-size: 14px; margin-bottom: 2px; color: var(--text); }
+.c-notice.warn .bd b { color: var(--warn); }
+.c-notice.bad .bd b { color: var(--danger); }
+.c-notice.info .bd b { color: var(--brand); }
+.c-notice .bd .btn { margin-top: 10px; box-shadow: var(--shadow-1); }
+
+/* --------------------------------------------------------------- bo'sh holat */
+
+.c-empty {
+  text-align: center; padding: 34px 18px;
+  background: var(--surface); border: 1px dashed var(--line-strong);
+  border-radius: var(--r); color: var(--muted);
+}
+.c-empty .em { font-size: 30px; display: block; margin-bottom: 9px; opacity: .65; }
+.c-empty b { display: block; color: var(--text); font-size: 15px; margin-bottom: 4px; }
+.c-empty .btn { margin-top: 15px; }
+
+/* --------------------------------------------------------------- chiplar */
+
+/* 4 ta variant — aynan bitta qatorga sig'adi. Beshinchisi qo'shilsa
+   yolg'iz ikkinchi qatorga tushib ketadi, shuning uchun 4 ta: 1/3/6/12 oy. */
+.chips { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 6px; }
+.chips.c3 { grid-template-columns: repeat(3, 1fr); }
+.chip { position: relative; }
+.chip input { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; min-height: 0; }
+.chip span {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 56px; padding: 7px 4px;
+  border: 1px solid var(--line-strong); border-radius: var(--r-sm);
+  background: var(--surface); cursor: pointer;
+  font-size: 15px; font-weight: 700; line-height: 1.2;
+  transition: border-color .12s, background .12s;
+}
+.chip span i {
+  font-style: normal; font-size: 10.5px; font-weight: 500;
+  color: var(--muted); margin-top: 3px; font-variant-numeric: tabular-nums;
+  /* Narx ikki qatorga bo'linib chipni cho'zib yubormasin */
+  white-space: nowrap;
+}
+.chip input:checked + span {
+  border-color: var(--brand); background: var(--brand-soft); color: var(--brand);
+  box-shadow: 0 0 0 2px var(--brand-soft);
+}
+.chip input:checked + span i { color: var(--brand); }
+.chip input:disabled + span { opacity: .4; cursor: not-allowed; }
+
+/* Tez tanlash summalari (hisobni to'ldirish) — oy chiplari bilan bir xil
+   ko'rinishda bo'lsin, va tanlangani belgilanib turishi kerak */
+.amt-chip {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; min-height: 48px; padding: 7px 4px;
+  border: 1px solid var(--line-strong); border-radius: var(--r-sm);
+  background: var(--surface); color: var(--text);
+  font: inherit; font-size: 14px; font-weight: 700;
+  font-variant-numeric: tabular-nums; white-space: nowrap; cursor: pointer;
+  transition: border-color .12s, background .12s;
+}
+.amt-chip:hover { background: var(--surface-2); }
+.amt-chip.is-on {
+  border-color: var(--brand); background: var(--brand-soft); color: var(--brand);
+  box-shadow: 0 0 0 2px var(--brand-soft);
+}
+
+/* ------------------------------------------------------ to'lov xulosasi */
+
+/* Karta ichidagi karta — oq ustiga oq bo'lib qolmasligi uchun
+   ikkinchi darajali yuza rangi, soyasiz */
+.sum-card {
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: var(--r); padding: 16px; margin: 14px 0;
+}
+.sum-card .lbl { font-size: 12px; color: var(--muted); font-weight: 600; }
+.sum-card .big {
+  font-size: 29px; font-weight: 800; letter-spacing: -.03em;
+  margin-top: 2px; font-variant-numeric: tabular-nums;
+}
+.sum-card .note { font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+/* To'lov kartasi — haqiqiy plastik bank kartasiga o'xshatilgan, lekin FLAT:
+   gradient yo'q, sayqal yo'q, oltin chip yo'q. Bitta tekis to'q rang —
+   doim, saytning yorug'/qora temasidan qat'i nazar, chunki haqiqiy karta ham
+   atrofdagi muhitga qarab rang almashtirmaydi. */
+.bank-card {
+  position: relative;
+  border-radius: var(--r-lg); padding: 18px 18px 16px;
+  margin-top: 10px; color: #fff;
+  background: #1b1e29;
+  border: 1px solid rgba(255, 255, 255, .07);
+}
+.bank-card .chip {
+  display: block; width: 32px; height: 23px; border-radius: 5px;
+  background: rgba(255, 255, 255, .16);
+  margin-bottom: 15px;
+}
+.bank-card .lbl {
+  font-size: 10.5px; font-weight: 700; letter-spacing: .09em;
+  text-transform: uppercase; opacity: .68;
+}
+.bank-card .num {
+  font-size: 19px; font-weight: 700; letter-spacing: .045em;
+  margin: 8px 0 16px; font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.bank-card .foot {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 10px;
+}
+.bank-card .who { font-size: 13.5px; font-weight: 600; letter-spacing: .01em; }
+.bank-card .bank {
+  font-size: 10.5px; font-weight: 600; opacity: .72;
+  text-transform: uppercase; letter-spacing: .06em;
+}
+.bank-card .cp {
+  position: absolute; top: 14px; right: 14px; z-index: 2;
+  min-height: 36px; padding: 7px 13px;
+  border-radius: var(--r-pill); border: 1px solid rgba(255, 255, 255, .32);
+  background: rgba(255, 255, 255, .14); backdrop-filter: blur(3px);
+  color: #fff; font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer;
+}
+.bank-card .cp:hover { background: rgba(255, 255, 255, .24); }
+.bank-card .cp:active { transform: scale(.97); }
+
+/* --------------------------------------------------------- fayl tanlash */
+
+.file-pick { margin-top: 6px; }
+.file-pick input[type="file"] { position: absolute; opacity: 0; width: 0; height: 0; min-height: 0; }
+.file-pick .zone {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 5px; min-height: 104px; padding: 16px;
+  border: 1.5px dashed var(--line-strong); border-radius: var(--r);
+  background: var(--surface-2); cursor: pointer; text-align: center;
+  color: var(--text-2);
+}
+.file-pick .zone:hover { border-color: var(--brand); background: var(--brand-soft); }
+.file-pick .zone .em { font-size: 25px; opacity: .7; }
+.file-pick .zone b { font-size: 14px; }
+.file-pick .zone .hint { font-size: 12px; color: var(--muted); }
+.file-pick.has .zone { display: none; }
+
+.file-prev { display: none; align-items: center; gap: 11px; padding: 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.file-pick.has .file-prev { display: flex; }
+.file-prev img {
+  width: 56px; height: 56px; flex: none; object-fit: cover;
+  border-radius: 9px; border: 1px solid var(--line); background: var(--surface-2);
+}
+.file-prev .pdf {
+  width: 56px; height: 56px; flex: none; display: grid; place-items: center;
+  border-radius: 9px; border: 1px solid var(--line); background: var(--surface-2); font-size: 21px;
+}
+.file-prev .meta { flex: 1; min-width: 0; }
+.file-prev .meta b { display: block; font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-prev .meta span { font-size: 12px; color: var(--muted); }
+.file-prev .rm {
+  flex: none; width: 40px; height: 40px; border-radius: 9px;
+  border: 1px solid var(--line-strong); background: var(--surface);
+  color: var(--muted); font-size: 15px; cursor: pointer;
+}
+.file-prev .rm:hover { color: var(--danger); border-color: var(--danger-line); }
+
+/* --------------------------------------------------------------- ro'yxat */
+
+.c-list { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow-1); overflow: hidden; }
+.c-item { display: flex; align-items: flex-start; gap: 12px; padding: 13px 15px; border-bottom: 1px solid var(--line); }
+.c-item:last-child { border-bottom: 0; }
+.c-item .ico { width: 34px; height: 34px; flex: none; display: grid; place-items: center; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line); font-size: 15px; }
+.c-item .bd { flex: 1; min-width: 0; }
+.c-item .bd b { display: block; font-size: 14.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.c-item .bd .sub { font-size: 12.5px; color: var(--muted); margin-top: 1px; }
+.c-item .bd .why { font-size: 12.5px; color: var(--danger); margin-top: 5px; background: var(--danger-bg); border-radius: 7px; padding: 5px 8px; }
+.c-item .rt { flex: none; text-align: right; }
+.c-item .rt .amt { font-size: 14.5px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+.c-item .rt .badge { margin-top: 4px; }
+
+/* Ma'lumot qatorlari (profil) */
+.kv { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow-1); overflow: hidden; }
+.kv .r { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 15px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.kv .r:last-child { border-bottom: 0; }
+.kv .r .k { color: var(--muted); }
+.kv .r .v { font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* --------------------------------------------------------- tab paneli */
+
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+  display: flex;
+  /* Avval qattiq rang — color-mix() ni tushunmaydigan brauzerda panel
+     shaffof bo'lib qolmasligi uchun. Keyingi qator qo'llab-quvvatlansa ustidan yozadi. */
+  background: var(--surface);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: saturate(180%) blur(12px);
+  border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .tabbar { background: var(--surface); }
+}
+/* DIQQAT: .tabbar — bu <nav>, shuning uchun style.css dagi
+   `nav a`, `nav a:hover`, `nav a.on` qoidalari ham unga tushadi.
+   Fonni va yumaloq burchakni ataylab bekor qilamiz, aks holda aktiv tab
+   to'ldirilgan ko'k to'rtburchak bo'lib ko'rinadi. */
+.tabbar a {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; min-height: 58px; padding: 7px 4px;
+  color: var(--muted); font-size: 11px; font-weight: 600;
+  background: none; border-radius: 0;
+}
+.tabbar a:hover { background: none; color: var(--text-2); }
+.tabbar a .ic { font-size: 19px; line-height: 1; }
+.tabbar a.on, .tabbar a.on:hover { color: var(--brand); background: none; }
+
+/* Desktop: pastdagi tab panel o'rniga yuqoridagi menyu */
+.c-topnav { display: none; }
+@media (min-width: 760px) {
+  .tabbar { display: none; }
+  body.c-app { padding-bottom: 0; }
+  .c-topnav { display: flex; }
+  .c-wrap { max-width: 620px; padding-top: 22px; }
+}
+
+/* --------------------------------------------------------------- toast */
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  transform: translate(-50%, 14px);
+  background: #101828; color: #fff;
+  padding: 11px 17px; border-radius: var(--r-pill);
+  font-size: 13.5px; font-weight: 600;
+  box-shadow: var(--shadow-3);
+  opacity: 0; pointer-events: none;
+  transition: opacity .2s, transform .2s;
+  z-index: 50; max-width: calc(100vw - 32px);
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+@media (prefers-color-scheme: dark) {
+  .toast { background: #2b313d; }
+}
+
+/* --------------------------------------------------------- kirish sahifasi */
+
+.c-login { max-width: 400px; margin: 0 auto; padding: 32px 18px 40px; }
+.c-login .mark {
+  width: 56px; height: 56px; margin: 0 auto 16px;
+  border-radius: 17px; background: var(--brand); color: #fff;
+  display: grid; place-items: center; font-size: 26px; font-weight: 700;
+  box-shadow: var(--shadow-3);
+}
+.c-login h1 { text-align: center; font-size: 21px; margin-bottom: 5px; }
+.c-login .tag { text-align: center; color: var(--muted); font-size: 14px; margin: 0 0 22px; }
+.c-login .box { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px; box-shadow: var(--shadow-2); }
+.c-login .help { text-align: center; font-size: 13px; color: var(--muted); margin-top: 16px; line-height: 1.6; }
+.c-login .help a { font-weight: 600; }

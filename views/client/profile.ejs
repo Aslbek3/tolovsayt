@@ -1,24 +1,90 @@
-<%- include('../partials/header') %>
-<h1>Profil</h1>
-<div class="cols">
-  <div class="card">
-    <h2>Ma'lumotlar</h2>
-    <p><span class="muted">Ism:</span> <b><%= me.name %></b></p>
-    <p><span class="muted">Telefon:</span> <b>+<%= me.phone %></b></p>
-    <p><span class="muted">Telegram:</span> <%- me.tg_chat_id ? '<span class="badge green">Ulangan</span>' : '<span class="badge gray">Ulanmagan</span>' %></p>
-    <% if (!me.tg_chat_id) { %>
-      <form method="post" action="/telegram-link" target="_blank"><button class="btn sm">Telegramni ulash</button></form>
-    <% } else { %>
-      <form method="post" action="/telegram-unlink" onsubmit="return confirm('Telegramni uzasizmi?')"><button class="btn sm ghost">Uzish</button></form>
-    <% } %>
+<%- include('../partials/chead') %>
+
+<div class="c-head">
+  <div>
+    <div class="hi">Hisobim</div>
+    <div class="who"><%= me.name %></div>
   </div>
-  <div class="card">
-    <h2>Parolni o'zgartirish</h2>
-    <form method="post" action="/profile/password">
-      <label>Eski parol</label><input type="password" name="old_password" required>
-      <label>Yangi parol</label><input type="password" name="new_password" minlength="6" required>
-      <button class="btn full">Saqlash</button>
-    </form>
+  <a class="icon-btn" href="/" title="Asosiy" aria-label="Asosiy">←</a>
+</div>
+
+<div class="c-section">
+  <div class="cap">Ma'lumotlar</div>
+  <div class="kv">
+    <div class="r"><span class="k">Telefon</span><span class="v"><%= u.fmtPhone(me.phone) %></span></div>
+    <div class="r"><span class="k">A'zo bo'lgan sana</span><span class="v"><%= u.fmtDate(me.created_at) %></span></div>
+    <div class="r"><span class="k">Balans</span><span class="v"><%= u.money(summary.balance) %></span></div>
   </div>
 </div>
-<%- include('../partials/footer') %>
+
+<div class="c-section">
+  <div class="cap">Telegram</div>
+  <div class="card" style="margin-bottom:0">
+    <% if (me.tg_chat_id) { %>
+      <div class="row between">
+        <div>
+          <b>Ulangan</b> <span class="badge green">faol</span>
+          <div class="muted small" style="margin-top:3px">Eslatmalar va to'lov tasdiqlari Telegramga keladi.</div>
+        </div>
+        <form method="post" action="/telegram-unlink" onsubmit="return confirm('Telegramni uzasizmi? Eslatmalar kelmay qo\'yadi.')">
+          <button class="btn sm ghost" type="submit">Uzish</button>
+        </form>
+      </div>
+    <% } else { %>
+      <div>
+        <b>Ulanmagan</b>
+        <div class="muted small" style="margin-top:3px">Muddat yaqinlashganda eslatma olish uchun Telegramni ulang.</div>
+      </div>
+      <% if (botUsername) { %>
+        <form method="post" action="/telegram-link" target="_blank">
+          <button class="btn full" type="submit">Telegramni ulash</button>
+        </form>
+      <% } else { %>
+        <p class="muted small" style="margin:8px 0 0">Bot hozircha sozlanmagan.</p>
+      <% } %>
+    <% } %>
+  </div>
+</div>
+
+<div class="c-section">
+  <div class="cap">Statistika</div>
+  <div class="kv">
+    <div class="r"><span class="k">Jami xizmatlar</span><span class="v"><%= summary.totalServices %></span></div>
+    <div class="r"><span class="k">Faol / to'xtatilgan</span><span class="v"><%= summary.activeCount %> / <%= summary.suspendedCount %></span></div>
+    <div class="r"><span class="k">Jami to'langan</span><span class="v"><%= u.money(summary.totalPaid) %></span></div>
+    <% if (summary.lastPaymentDate) { %>
+      <div class="r"><span class="k">Oxirgi to'lov</span><span class="v"><%= u.fmtDate(summary.lastPaymentDate) %></span></div>
+    <% } %>
+    <% if (summary.nearestDue) { %>
+      <div class="r"><span class="k">Eng yaqin muddat</span><span class="v"><%= u.fmtDate(summary.nearestDue) %></span></div>
+    <% } %>
+  </div>
+</div>
+
+<div class="c-section">
+  <div class="cap">Xavfsizlik</div>
+  <div class="card" style="margin-bottom:0">
+    <details>
+      <summary>Parolni o'zgartirish</summary>
+      <form method="post" action="/profile/password" data-once="Saqlanmoqda…">
+        <label>Eski parol</label>
+        <input type="password" name="old_password" autocomplete="current-password" required>
+        <label>Yangi parol</label>
+        <input type="password" name="new_password" minlength="6" autocomplete="new-password" required>
+        <button class="btn full" type="submit">Saqlash</button>
+      </form>
+    </details>
+  </div>
+</div>
+
+<% if (settings.admin_contact) { %>
+  <p class="muted small center" style="margin:0 0 14px">
+    Savol bo'lsa: <a href="https://t.me/<%= settings.admin_contact.replace('@', '') %>" target="_blank" rel="noopener"><%= settings.admin_contact %></a>
+  </p>
+<% } %>
+
+<form method="post" action="/logout">
+  <button class="btn ghost full" type="submit" style="margin-top:0">Hisobdan chiqish</button>
+</form>
+
+<%- include('../partials/cfoot') %>

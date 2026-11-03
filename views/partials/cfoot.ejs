@@ -1,0 +1,11 @@
+</main>
+<% if (typeof me !== 'undefined' && me) { %>
+  <nav class="tabbar">
+    <a href="/" class="<%= path === '/' ? 'on' : '' %>"><span class="ic">🏠</span>Asosiy</a>
+    <a href="/payments" class="<%= path.startsWith('/payments') ? 'on' : '' %>"><span class="ic">🧾</span>To'lovlar</a>
+    <a href="/profile" class="<%= path.startsWith('/profile') || path.startsWith('/hisobim') ? 'on' : '' %>"><span class="ic">👤</span>Profil</a>
+  </nav>
+<% } %>
+<script src="/static/client.js" defer></script>
+</body>
+</html>

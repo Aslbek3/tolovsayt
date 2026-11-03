@@ -1,0 +1,45 @@
+<%
+  const left = u.daysLeft(s.paid_until);
+  const suspended = s.status === 'suspended';
+  const urgent = suspended || left < 0;
+  const soon = !urgent && left <= 3;
+  const cls = urgent ? 'is-urgent' : (soon ? 'is-soon' : '');
+  // Chiziq: 30 kunga nisbatan qolgan kunlar.
+  // Muddati o'tgan yoki to'xtatilgan xizmatda chiziq TO'LA qizil bo'ladi —
+  // aks holda u bo'sh kulrang trek bo'lib, oddiy ajratuvchi chiziqqa o'xshab
+  // qolardi va holat umuman ko'rinmasdi.
+  const pct = urgent ? 100 : Math.max(0, Math.min(100, Math.round(left / 30 * 100)));
+  const leftText = suspended ? "To'xtatilgan"
+    : left < 0 ? `${-left} kun o'tdi`
+    : left === 0 ? 'Bugun tugaydi'
+    : `${left} kun qoldi`;
+%>
+<div class="c-svc <%= cls %>">
+  <div class="hd">
+    <div class="ico <%= s.type === 'sayt' ? 'ico-site' : 'ico-bot' %>"><%= s.type === 'sayt' ? '🌐' : '🤖' %></div>
+    <div class="nm">
+      <b><%= s.name %></b>
+      <div class="sub"><b><%= u.money(s.price) %></b> / oy</div>
+    </div>
+    <%- include('badge', { s: s }) %>
+  </div>
+
+  <div class="bar"><i style="width: <%= pct %>%"></i></div>
+
+  <div class="ft">
+    <div class="when"><%= leftText %> · <b><%= u.fmtDate(s.paid_until) %></b> gacha</div>
+    <% if (!pend) { %>
+      <a class="btn" href="/pay/<%= s.id %>">To'lash</a>
+    <% } %>
+  </div>
+
+  <% if (pend) { %>
+    <div class="c-pending">
+      <span class="dot"></span>
+      <span>Chek tekshirilmoqda · <%= u.money(pend.amount) %></span>
+      <form method="post" action="/payments/<%= pend.id %>/cancel" onsubmit="return confirm('Yuborilgan chekni bekor qilasizmi? Keyin qaytadan yuborishingiz mumkin.')">
+        <button class="link-sm" type="submit">Bekor qilish</button>
+      </form>
+    </div>
+  <% } %>
+</div>
