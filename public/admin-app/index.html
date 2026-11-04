@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Admin panel</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, sans-serif; }
+  .box { max-width: 360px; margin: 18vh auto 0; padding: 0 18px; text-align: center; }
+  .mark {
+    width: 52px; height: 52px; margin: 0 auto 16px; border-radius: 15px;
+    background: var(--brand); color: #fff; display: grid; place-items: center;
+    font-size: 24px; font-weight: 700;
+  }
+  .spin {
+    width: 26px; height: 26px; margin: 18px auto 0; border-radius: 50%;
+    border: 3px solid var(--line); border-top-color: var(--brand);
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .err { color: var(--danger); font-size: 13.5px; margin-top: 14px; }
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="mark">🛠</div>
+  <h1 style="font-size:18px;margin:0 0 6px">Admin panel</h1>
+  <p id="msg" class="muted" style="margin:0">Tasdiqlanmoqda…</p>
+  <div id="spin" class="spin"></div>
+</div>
+<script>
+(function () {
+  'use strict';
+  var tg = window.Telegram && window.Telegram.WebApp;
+  if (tg) { try { tg.ready(); tg.expand(); } catch (e) {} }
+  var initData = (tg && tg.initData) || '';
+
+  function fail(text) {
+    document.getElementById('spin').style.display = 'none';
+    document.getElementById('msg').textContent = text;
+    var p = document.getElementById('msg');
+    p.className = 'err';
+  }
+
+  if (!initData) {
+    fail("Bu sahifa faqat Telegram ichida ochilganda ishlaydi.");
+    return;
+  }
+
+  fetch('/admin/tg-login', { method: 'POST', headers: { 'X-Tg-Init-Data': initData } })
+    .then(function (res) { return res.json().then(function (d) { return { ok: res.ok, d: d }; }); })
+    .then(function (r) {
+      if (r.ok && r.d && r.d.ok) {
+        location.href = '/admin';
+      } else {
+        fail("Siz admin ro'yxatida emassiz. Admin bilan bog'laning.");
+      }
+    })
+    .catch(function () { fail('Xatolik yuz berdi. Qayta urinib ko\'ring.'); });
+})();
+</script>
+</body>
+</html>

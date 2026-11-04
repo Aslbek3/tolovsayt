@@ -6,6 +6,7 @@ const rateLimit = require('express-rate-limit');
 const { db, getSettings, setSetting } = require('../db');
 const billing = require('../billing');
 const tg = require('../telegram');
+const { verifyInitData } = require('../miniapp');
 const { normPhone, today, addMonths, daysLeft, fmtDate } = require('../utils');
 
 const router = express.Router();
@@ -28,6 +29,20 @@ router.post('/login', loginLimiter, (req, res) => {
   res.redirect('/admin/login');
 });
 router.post('/logout', (req, res) => { req.session.isAdmin = false; res.redirect('/admin/login'); });
+
+// Telegram Mini App orqali parolsiz kirish — FAQAT ADMIN_CHAT_ID ro'yxatidagi
+// Telegram foydalanuvchilari uchun. initData HMAC bilan tasdiqlanadi (src/miniapp.js,
+// mijoz Mini App'ida ishlatilgan aynan shu funksiya), so'ng oddiy login bilan BIR XIL
+// sessiya o'rnatiladi (req.session.isAdmin = true) — shundan keyin butun admin panel
+// (parolli kirishdagi kabi) ishlayveradi, alohida kod yo'li kerak emas.
+router.post('/tg-login', (req, res) => {
+  const result = verifyInitData(req.header('X-Tg-Init-Data'));
+  if (!result || !tg.ADMIN_CHAT_IDS.includes(String(result.user.id))) {
+    return res.status(403).json({ ok: false });
+  }
+  req.session.isAdmin = true;
+  res.json({ ok: true });
+});
 
 router.use((req, res, next) => (req.session.isAdmin ? next() : res.redirect('/admin/login')));
 

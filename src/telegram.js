@@ -299,7 +299,16 @@ async function startPolling() {
   // chunki Telegram menu button uchun http (lokal) manzilni qabul qilmaydi.
   const site = process.env.SITE_URL || '';
   if (site.startsWith('https://')) {
+    // Hammaga (mijozlarga) — global standart tugma
     await call('setChatMenuButton', { menu_button: { type: 'web_app', text: '💳 Kabinet', web_app: { url: `${site}/app` } } });
+    // Faqat adminlarga — shu chat uchun ALOHIDA tugma (chat_id bilan global ustidan yoziladi),
+    // admin panelni (parolsiz, Telegram orqali) ochadigan Mini App'ga olib boradi
+    for (const chatId of ADMIN_CHAT_IDS) {
+      await call('setChatMenuButton', {
+        chat_id: chatId,
+        menu_button: { type: 'web_app', text: '🛠 Admin panel', web_app: { url: `${site}/admin-app` } },
+      });
+    }
   }
 
   console.log(`[telegram] bot ishga tushdi: @${botUsername}`);
@@ -322,4 +331,4 @@ async function startPolling() {
   }
 }
 
-module.exports = { send, sendAdmin, notifyAdminPayment, notifyAdminTopup, startPolling, getBotUsername: () => botUsername };
+module.exports = { send, sendAdmin, notifyAdminPayment, notifyAdminTopup, startPolling, getBotUsername: () => botUsername, ADMIN_CHAT_IDS };
