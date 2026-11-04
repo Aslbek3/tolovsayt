@@ -42,6 +42,9 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use('/tg', require('./routes/tg').router);
+app.get('/app', (req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'app', 'index.html')));
+
 app.use('/admin', require('./routes/admin'));
 app.use('/', require('./routes/client'));
 

@@ -132,9 +132,16 @@ function logOnce(serviceId, kind, forDate) {
   return r.changes > 0;
 }
 
-// Eslatma xabari ostiga "To'lash" tugmasi (saytdagi shu xizmat uchun to'lov sahifasiga olib boradi)
+// Eslatma xabari ostiga "To'lash" tugmasi — endi saytga emas, Telegram Mini App'ga olib boradi.
+// `web_app` tugmasi FAQAT HTTPS URL bilan ishlaydi, shuning uchun lokal (http) muhitda
+// zaxira sifatida eski saytning oddiy `url` tugmasi qoldiriladi.
 function payButton(site, serviceId) {
-  return site ? { reply_markup: { inline_keyboard: [[{ text: "💳 To'lash", url: `${site}/pay/${serviceId}` }]] } } : {};
+  if (!site) return {};
+  const isHttps = site.startsWith('https://');
+  const button = isHttps
+    ? { text: "💳 To'lash", web_app: { url: `${site}/app#/pay/${serviceId}` } }
+    : { text: "💳 To'lash", url: `${site}/pay/${serviceId}` }; // lokal (http) — web_app ishlamaydi, eski saytga
+  return { reply_markup: { inline_keyboard: [[button]] } };
 }
 
 // Har kuni ishlaydi: eslatmalar + muddati o'tganlarni to'xtatish

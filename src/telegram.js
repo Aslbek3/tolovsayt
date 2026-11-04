@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const { db } = require('./db');
-const { esc, money } = require('./utils');
+const { esc, money, normPhone } = require('./utils');
 
 const TOKEN = process.env.BOT_TOKEN;
 const ADMIN_CHAT_IDS = (process.env.ADMIN_CHAT_ID || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -10,6 +10,14 @@ const API = `https://api.telegram.org/bot${TOKEN}`;
 let botUsername = null;
 
 const CLIENT_MENU = { keyboard: [["📋 Xizmatlarim", "💳 To'lovlarim"], ['👤 Hisobim']], resize_keyboard: true };
+
+// Mini App'ni ochadigan inline tugma — faqat HTTPS SITE_URL bo'lsa qo'shiladi
+// (Telegram web_app tugmasi http (lokal) manzillarni qabul qilmaydi).
+function miniAppButton() {
+  const site = process.env.SITE_URL || '';
+  if (!site.startsWith('https://')) return null;
+  return { inline_keyboard: [[{ text: '💳 Kabinetni ochish', web_app: { url: `${site}/app` } }]] };
+}
 
 // Admin "/xabar" bilan tanlangan mijozlarga xabar yuborish jarayoni (xotirada, bitta admin uchun)
 const broadcastState = new Map();
@@ -46,6 +54,13 @@ function send(chatId, text, extra = {}) {
 
 function sendAdmin(text, extra) {
   return Promise.all(ADMIN_CHAT_IDS.map(id => send(id, text, extra)));
+}
+
+// Ulangan mijozga Mini App'ni ochadigan tugmali qisqa xabar (SITE_URL https bo'lsa)
+function sendMiniAppButton(chatId) {
+  const kb = miniAppButton();
+  if (!kb) return null;
+  return send(chatId, '👇 Kabinetga kirish uchun:', { reply_markup: kb });
 }
 
 // Yangi to'lov haqida barcha adminlarga chek bilan xabar + Tasdiqlash/Rad etish tugmalari
@@ -125,7 +140,8 @@ async function handleUpdate(u) {
         const client = db.prepare('SELECT * FROM clients WHERE tg_link_token = ?').get(arg);
         if (client) {
           db.prepare('UPDATE clients SET tg_chat_id = ?, tg_link_token = NULL WHERE id = ?').run(chatId, client.id);
-          return send(chatId, `✅ Assalomu alaykum, <b>${esc(client.name)}</b>!\nTelegram hisobingiz ulandi. Endi to'lov muddati yaqinlashganda shu yerga eslatma yuboriladi.\n\nXizmatlaringiz va to'lovlaringiz haqida ma'lumot olish uchun pastdagi tugmalardan foydalaning.`, { reply_markup: CLIENT_MENU });
+          await send(chatId, `✅ Assalomu alaykum, <b>${esc(client.name)}</b>!\nTelegram hisobingiz ulandi. Endi to'lov muddati yaqinlashganda shu yerga eslatma yuboriladi.\n\nXizmatlaringiz va to'lovlaringiz haqida ma'lumot olish uchun pastdagi tugmalardan foydalaning.`, { reply_markup: CLIENT_MENU });
+          return sendMiniAppButton(chatId);
         }
         return send(chatId, "❌ Havola eskirgan yoki noto'g'ri. Saytdagi kabinetingizdan qaytadan ulang.");
       }
@@ -134,7 +150,8 @@ async function handleUpdate(u) {
       }
       const existing = db.prepare('SELECT * FROM clients WHERE tg_chat_id = ?').get(chatId);
       if (existing) {
-        return send(chatId, `Assalomu alaykum, <b>${esc(existing.name)}</b>!\nXizmatlaringiz va to'lovlaringiz haqida ma'lumot olish uchun pastdagi tugmalardan foydalaning.`, { reply_markup: CLIENT_MENU });
+        await send(chatId, `Assalomu alaykum, <b>${esc(existing.name)}</b>!\nXizmatlaringiz va to'lovlaringiz haqida ma'lumot olish uchun pastdagi tugmalardan foydalaning.`, { reply_markup: CLIENT_MENU });
+        return sendMiniAppButton(chatId);
       }
       return send(chatId, `Assalomu alaykum! Sizning chat ID: <code>${chatId}</code>\n\nHisobingizni ulash uchun admin bilan bog'laning: @Coder_uzzz`);
     }
@@ -196,6 +213,29 @@ async function handleUpdate(u) {
     return;
   }
 
+  // Mijoz "Raqamni ulashish" tugmasini bosib kontaktini yuborgan — shu orqali hisobni ulaymiz
+  if (u.message && u.message.contact) {
+    const chatId = String(u.message.chat.id);
+
+    // XAVFSIZLIK: faqat o'z raqamini yuborgan odam ishonchli — boshqa birovning
+    // kontaktini ulashtirib ularning hisobiga kirib bo'lmasin
+    if (String(u.message.contact.user_id) !== String(u.message.from.id)) {
+      return send(chatId, "⚠️ Faqat o'zingizning raqamingizni ulashing.");
+    }
+
+    const phone = normPhone(u.message.contact.phone_number);
+    const client = db.prepare('SELECT * FROM clients WHERE phone = ?').get(phone);
+    if (!client) {
+      await send(chatId, "❌ Bu raqam bo'yicha hisob topilmadi. Admin bilan bog'laning: @Coder_uzzz", { reply_markup: { remove_keyboard: true } });
+      sendAdmin(`⚠️ Noma'lum raqam Mini App orqali ulanishga urindi: <b>${esc(u.message.from.first_name || '')}</b> (chat ${chatId}), raqam: <code>${esc(phone)}</code>`);
+      return;
+    }
+
+    db.prepare('UPDATE clients SET tg_chat_id = ? WHERE id = ?').run(chatId, client.id);
+    await send(chatId, `✅ Hisobingiz ulandi, ${esc(client.name)}! Endi "💳 Kabinet" tugmasi orqali kiring.`, { reply_markup: CLIENT_MENU });
+    return sendMiniAppButton(chatId);
+  }
+
   if (u.callback_query) {
     const q = u.callback_query;
     const chatId = String(q.message?.chat?.id || q.from.id);
@@ -254,6 +294,14 @@ async function startPolling() {
   const me = await call('getMe');
   botUsername = me?.username || null;
   await call('deleteWebhook', {});
+
+  // Pastki chap tugmani "Kabinet" Mini App'iga aylantiramiz — FAQAT https SITE_URL bo'lsa,
+  // chunki Telegram menu button uchun http (lokal) manzilni qabul qilmaydi.
+  const site = process.env.SITE_URL || '';
+  if (site.startsWith('https://')) {
+    await call('setChatMenuButton', { menu_button: { type: 'web_app', text: '💳 Kabinet', web_app: { url: `${site}/app` } } });
+  }
+
   console.log(`[telegram] bot ishga tushdi: @${botUsername}`);
   let offset = 0;
   for (;;) {

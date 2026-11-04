@@ -17,20 +17,21 @@
 <div class="card table-wrap">
   <h2>Xizmatlari</h2>
   <% if (!services.length) { %><p class="muted">Hali xizmat qo'shilmagan.</p><% } else { %>
-  <table>
-    <tr><th>Nomi</th><th>Narx</th><th>Muddat</th><th>Holat</th><th></th></tr>
+  <table class="adm-cardify">
+    <thead><tr><th>Nomi</th><th>Narx</th><th>Muddat</th><th>Holat</th><th></th></tr></thead>
+    <tbody>
     <% services.forEach(s => { %>
     <tr>
-      <td><a href="/admin/services/<%= s.id %>"><b><%= s.name %></b></a><div class="type"><%= s.type %></div></td>
-      <td><%= u.money(s.price) %></td>
-      <td>
+      <td data-label="Nomi"><a href="/admin/services/<%= s.id %>"><b><%= s.name %></b></a><div class="type"><%= s.type %></div></td>
+      <td data-label="Narx"><%= u.money(s.price) %></td>
+      <td data-label="Muddat">
         <form class="inline" method="post" action="/admin/services/<%= s.id %>/set-date" onsubmit="return confirm('Muddat qo\'lda o\'zgartirilsinmi?')">
           <input type="date" name="paid_until" value="<%= s.paid_until %>" style="width:150px">
           <button class="btn sm ghost" title="Sanani to'g'ridan-to'g'ri qo'lda o'rnatish">Saqlash</button>
         </form>
       </td>
-      <td><%- include('../partials/badge', { s }) %></td>
-      <td><div class="actions">
+      <td data-label="Holat"><%- include('../partials/badge', { s }) %></td>
+      <td data-label="Amal"><div class="actions">
         <form class="inline" method="post" action="/admin/services/<%= s.id %>/extend">
           <input type="hidden" name="record" value="1">
           <select name="months" style="width:auto;padding:5px"><% [1,2,3,6,12].forEach(m => { %><option value="<%= m %>"><%= m %> oy</option><% }) %></select>
@@ -39,6 +40,7 @@
       </div></td>
     </tr>
     <% }) %>
+    </tbody>
   </table>
   <% } %>
 </div>
@@ -85,14 +87,19 @@
 <div class="card table-wrap">
   <h2>To'lovlar</h2>
   <% if (!payments.length) { %><p class="muted">To'lovlar yo'q.</p><% } else { %>
-  <table>
-    <tr><th>Sana</th><th>Xizmat</th><th>Muddat</th><th>Summa</th><th>Holat</th></tr>
+  <table class="adm-cardify">
+    <thead><tr><th>Sana</th><th>Xizmat</th><th>Muddat</th><th>Summa</th><th>Holat</th></tr></thead>
+    <tbody>
     <% payments.forEach(p => { %>
     <tr>
-      <td><%= p.created_at %></td><td><%= p.service_name %></td><td><%= p.months %> oy</td><td><%= u.money(p.amount) %></td>
-      <td><span class="badge <%= p.status === 'approved' ? 'green' : p.status === 'pending' ? 'amber' : 'red' %>"><%= { pending: 'Kutilmoqda', approved: 'Tasdiqlangan', rejected: 'Rad etilgan' }[p.status] %></span></td>
+      <td data-label="Sana"><%= p.created_at %></td>
+      <td data-label="Xizmat"><%= p.service_name %></td>
+      <td data-label="Muddat"><%= p.months %> oy</td>
+      <td data-label="Summa"><%= u.money(p.amount) %></td>
+      <td data-label="Holat"><span class="badge <%= p.status === 'approved' ? 'green' : p.status === 'pending' ? 'amber' : 'red' %>"><%= { pending: 'Kutilmoqda', approved: 'Tasdiqlangan', rejected: 'Rad etilgan' }[p.status] %></span></td>
     </tr>
     <% }) %>
+    </tbody>
   </table>
   <% } %>
 </div>
@@ -100,14 +107,17 @@
 <div class="card table-wrap">
   <h2>Hisobga pul qo'shish so'rovlari</h2>
   <% if (!topups.length) { %><p class="muted">Hali so'rov yo'q.</p><% } else { %>
-  <table>
-    <tr><th>Sana</th><th>Summa</th><th>Holat</th></tr>
+  <table class="adm-cardify">
+    <thead><tr><th>Sana</th><th>Summa</th><th>Holat</th></tr></thead>
+    <tbody>
     <% topups.forEach(t => { %>
     <tr>
-      <td><%= t.created_at %></td><td><%= u.money(t.amount) %></td>
-      <td><span class="badge <%= t.status === 'approved' ? 'green' : t.status === 'pending' ? 'amber' : 'red' %>"><%= { pending: 'Kutilmoqda', approved: 'Tasdiqlangan', rejected: 'Rad etilgan' }[t.status] %></span></td>
+      <td data-label="Sana"><%= t.created_at %></td>
+      <td data-label="Summa"><%= u.money(t.amount) %></td>
+      <td data-label="Holat"><span class="badge <%= t.status === 'approved' ? 'green' : t.status === 'pending' ? 'amber' : 'red' %>"><%= { pending: 'Kutilmoqda', approved: 'Tasdiqlangan', rejected: 'Rad etilgan' }[t.status] %></span></td>
     </tr>
     <% }) %>
+    </tbody>
   </table>
   <% } %>
 </div>

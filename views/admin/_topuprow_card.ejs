@@ -1,0 +1,29 @@
+<%# Pul qo'shish so'rovi qatorining mobil (<640px) karta ko'rinishi — _topuprow.ejs
+    bilan bir xil ma'lumot, faqat <table> emas, alohida karta (usul B). %>
+<div class="adm-cardrow">
+  <div class="adm-cardrow-top">
+    <div class="adm-cardrow-main">
+      <b><%= t.client_name %></b>
+      <div class="muted small">+<%= t.phone %> · #<%= t.id %></div>
+    </div>
+    <div class="adm-cardrow-amt">
+      <b><%= u.money(t.amount) %></b>
+      <div class="muted small"><%= t.created_at %></div>
+    </div>
+  </div>
+  <% if (t.comment) { %><div class="adm-cardrow-mid"><%= t.comment %></div><% } %>
+  <% if (t.receipt_path) { %>
+    <a class="adm-cardrow-receipt" href="/admin/topup-receipt/<%= t.id %>" target="_blank">
+      <% if (/\.pdf$/i.test(t.receipt_path)) { %>📄 Chekni ko'rish (PDF)<% } else { %><img class="receipt-thumb" src="/admin/topup-receipt/<%= t.id %>" alt="chek"> Chekni ko'rish<% } %>
+    </a>
+  <% } %>
+  <div class="adm-cardrow-foot">
+    <% if (t.status === 'pending') { %>
+      <form class="inline" method="post" action="/admin/topups/<%= t.id %>/approve"><button class="btn sm green">✓ Tasdiqlash</button></form>
+      <form class="inline" method="post" action="/admin/topups/<%= t.id %>/reject" onsubmit="const r=prompt('Rad etish sababi:');if(r===null)return false;this.note.value=r;">
+        <input type="hidden" name="note"><button class="btn sm red">✕ Rad</button>
+      </form>
+    <% } else if (t.status === 'approved') { %><span class="badge green">Tasdiqlangan</span>
+    <% } else { %><span class="badge red">Rad etilgan</span><% if (t.admin_note) { %><div class="muted small"><%= t.admin_note %></div><% } %><% } %>
+  </div>
+</div>

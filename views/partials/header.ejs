@@ -14,20 +14,32 @@
   // yo'lni qo'yadi ('/admin/clients'), admin router esa mount prefiksisiz ('/clients').
   // Shuning uchun ikkalasini bitta '/admin/...' shakliga keltiramiz.
   const ap = ('/admin' + path).replace(/^\/admin\/admin(\/|$)/, '/admin$1').replace(/\/+$/, '') || '/admin';
+  // Admin qobig'i (sidebar + mobil tortma menyu) faqat login sahifasidan tashqari ko'rsatiladi
+  const isAdminShell = typeof admin !== 'undefined' && admin && ap !== '/admin/login';
+  const admNav = [
+    { href: '/admin', ic: '📊', label: 'Panel', on: ap === '/admin' },
+    { href: '/admin/clients', ic: '👥', label: 'Mijozlar', on: ap.startsWith('/admin/clients') },
+    { href: '/admin/services', ic: '🧩', label: 'Xizmatlar', on: ap.startsWith('/admin/services') },
+    { href: '/admin/payments', ic: '🧾', label: "To'lovlar", on: ap.startsWith('/admin/payments') },
+    { href: '/admin/topups', ic: '💰', label: "Pul qo'shish", on: ap.startsWith('/admin/topups') },
+    { href: '/admin/settings', ic: '⚙️', label: 'Sozlamalar', on: ap.startsWith('/admin/settings') },
+  ];
+  const admCur = admNav.find(n => n.on);
 %>
-<% if (typeof admin !== 'undefined' && admin && ap !== '/admin/login') { %>
-  <header class="top">
-    <a class="brand" href="/admin"><span class="logo">₿</span> <%= settings.site_name %> <small>admin</small></a>
-    <nav>
-      <a href="/admin" class="<%= ap === '/admin' ? 'on' : '' %>">Panel</a>
-      <a href="/admin/clients" class="<%= ap.startsWith('/admin/clients') ? 'on' : '' %>">Mijozlar</a>
-      <a href="/admin/services" class="<%= ap.startsWith('/admin/services') ? 'on' : '' %>">Xizmatlar</a>
-      <a href="/admin/payments" class="<%= ap.startsWith('/admin/payments') ? 'on' : '' %>">To'lovlar</a>
-      <a href="/admin/topups" class="<%= ap.startsWith('/admin/topups') ? 'on' : '' %>">Pul qo'shish</a>
-      <a href="/admin/settings" class="<%= ap.startsWith('/admin/settings') ? 'on' : '' %>">Sozlamalar</a>
-      <form method="post" action="/admin/logout"><button class="link">Chiqish</button></form>
-    </nav>
+<% if (isAdminShell) { %>
+  <header class="adm-topbar">
+    <button type="button" class="adm-burger" id="admBurger" aria-label="Menyu" aria-expanded="false" aria-controls="admSidebar">☰</button>
+    <span class="adm-topbar-title"><%= admCur ? admCur.label : settings.site_name %></span>
   </header>
+  <div class="adm-overlay" id="admOverlay"></div>
+  <aside class="adm-sidebar" id="admSidebar">
+    <a class="brand" href="/admin"><span class="logo">₿</span> <%= settings.site_name %> <small>admin</small></a>
+    <nav class="adm-nav">
+      <% admNav.forEach(n => { %><a href="<%= n.href %>" class="<%= n.on ? 'on' : '' %>"><span class="ic"><%= n.ic %></span><%= n.label %></a><% }) %>
+      <form method="post" action="/admin/logout" class="adm-logout"><button class="link" type="submit"><span class="ic">⎋</span>Chiqish</button></form>
+    </nav>
+  </aside>
+  <script src="/static/admin.js" defer></script>
 <% } %>
-<main class="wrap">
+<main class="wrap<%= isAdminShell ? ' adm-main' : '' %>">
 <% if (flash) { %><div class="alert <%= flash.type %>"><%= flash.msg %></div><% } %>

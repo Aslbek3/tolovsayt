@@ -17,41 +17,59 @@
   <div class="stat"><span>Mijozlar balansi (jami)</span><b><%= u.money(stats.totalBalance) %></b></div>
 </div>
 
-<div class="card table-wrap">
+<div class="card">
   <h2>⏳ Tasdiqlash kutilayotgan to'lovlar</h2>
   <% if (!pendingPayments.length) { %><p class="muted">Yangi to'lovlar yo'q.</p><% } else { %>
-  <table>
-    <tr><th>#</th><th>Mijoz</th><th>Xizmat</th><th>Summa</th><th>Chek</th><th></th></tr>
-    <% pendingPayments.forEach(p => { %><%- include('_payrow', { p }) %><% }) %>
-  </table>
+  <div class="table-wrap adm-desktop-only">
+    <table>
+      <thead><tr><th>#</th><th>Mijoz</th><th>Xizmat</th><th>Summa</th><th>Chek</th><th></th></tr></thead>
+      <tbody>
+      <% pendingPayments.forEach(p => { %><%- include('_payrow', { p }) %><% }) %>
+      </tbody>
+    </table>
+  </div>
+  <div class="adm-mobile-cards">
+    <% pendingPayments.forEach(p => { %><%- include('_payrow_card', { p }) %><% }) %>
+  </div>
   <% } %>
 </div>
 
-<div class="card table-wrap">
+<div class="card">
   <h2>💰 Tasdiqlash kutilayotgan "hisobga pul qo'shish" so'rovlari</h2>
   <% if (!pendingTopups.length) { %><p class="muted">Yangi so'rov yo'q.</p><% } else { %>
-  <table>
-    <tr><th>#</th><th>Mijoz</th><th>Summa</th><th>Chek</th><th></th></tr>
-    <% pendingTopups.forEach(t => { %><%- include('_topuprow', { t }) %><% }) %>
-  </table>
+  <div class="table-wrap adm-desktop-only">
+    <table>
+      <thead><tr><th>#</th><th>Mijoz</th><th>Summa</th><th>Chek</th><th></th></tr></thead>
+      <tbody>
+      <% pendingTopups.forEach(t => { %><%- include('_topuprow', { t }) %><% }) %>
+      </tbody>
+    </table>
+  </div>
+  <div class="adm-mobile-cards">
+    <% pendingTopups.forEach(t => { %><%- include('_topuprow_card', { t }) %><% }) %>
+  </div>
   <% } %>
 </div>
 
-<div class="card table-wrap">
+<div class="card">
   <h2>📅 Muddati yaqin va o'tgan xizmatlar (7 kun)</h2>
   <% if (!due.length) { %><p class="muted">Hammasi joyida.</p><% } else { %>
-  <table>
-    <tr><th>Xizmat</th><th>Mijoz</th><th>Narx</th><th>Muddat</th><th>Holat</th></tr>
-    <% due.forEach(s => { %>
-    <tr>
-      <td><a href="/admin/services/<%= s.id %>"><%= s.name %></a></td>
-      <td><a href="/admin/clients/<%= s.client_id %>"><%= s.client_name %></a></td>
-      <td><%= u.money(s.price) %></td>
-      <td><%= u.fmtDate(s.paid_until) %></td>
-      <td><%- include('../partials/badge', { s }) %></td>
-    </tr>
-    <% }) %>
-  </table>
+  <div class="table-wrap">
+    <table class="adm-cardify">
+      <thead><tr><th>Xizmat</th><th>Mijoz</th><th>Narx</th><th>Muddat</th><th>Holat</th></tr></thead>
+      <tbody>
+      <% due.forEach(s => { %>
+      <tr>
+        <td data-label="Xizmat"><a href="/admin/services/<%= s.id %>"><%= s.name %></a></td>
+        <td data-label="Mijoz"><a href="/admin/clients/<%= s.client_id %>"><%= s.client_name %></a></td>
+        <td data-label="Narx"><%= u.money(s.price) %></td>
+        <td data-label="Muddat"><%= u.fmtDate(s.paid_until) %></td>
+        <td data-label="Holat"><%- include('../partials/badge', { s }) %></td>
+      </tr>
+      <% }) %>
+      </tbody>
+    </table>
+  </div>
   <% } %>
 </div>
 <%- include('../partials/footer') %>

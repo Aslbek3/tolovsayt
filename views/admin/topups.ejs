@@ -6,12 +6,19 @@
   <a class="btn sm <%= status === 'approved' ? '' : 'ghost' %>" href="?status=approved">Tasdiqlangan</a>
   <a class="btn sm <%= status === 'rejected' ? '' : 'ghost' %>" href="?status=rejected">Rad etilgan</a>
 </div>
-<div class="card table-wrap">
+<div class="card">
   <% if (!topups.length) { %><p class="muted">So'rovlar yo'q.</p><% } else { %>
-  <table>
-    <tr><th>#</th><th>Mijoz</th><th>Summa</th><th>Chek</th><th>Holat</th></tr>
-    <% topups.forEach(t => { %><%- include('_topuprow', { t }) %><% }) %>
-  </table>
+  <div class="table-wrap adm-desktop-only">
+    <table>
+      <thead><tr><th>#</th><th>Mijoz</th><th>Summa</th><th>Chek</th><th>Holat</th></tr></thead>
+      <tbody>
+      <% topups.forEach(t => { %><%- include('_topuprow', { t }) %><% }) %>
+      </tbody>
+    </table>
+  </div>
+  <div class="adm-mobile-cards">
+    <% topups.forEach(t => { %><%- include('_topuprow_card', { t }) %><% }) %>
+  </div>
   <% } %>
 </div>
 <%- include('../partials/footer') %>

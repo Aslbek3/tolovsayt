@@ -8,18 +8,20 @@
     </form>
     <% if (!clients.length) { %><p class="muted">Mijozlar yo'q.</p><% } else { %>
     <form method="post" action="/admin/clients/message-bulk" onsubmit="return confirm('Tanlangan mijozlarga xabar yuborilsinmi?')">
-    <table>
-      <tr><th></th><th>Ism</th><th>Telefon</th><th>Xizmatlar</th><th>Yaqin muddat</th><th>TG</th></tr>
+    <table class="adm-cardify">
+      <thead><tr><th></th><th>Ism</th><th>Telefon</th><th>Xizmatlar</th><th>Yaqin muddat</th><th>TG</th></tr></thead>
+      <tbody>
       <% clients.forEach(c => { %>
       <tr>
-        <td><input type="checkbox" name="client_ids" value="<%= c.id %>" style="width:auto" <%= !c.tg_chat_id ? 'disabled title="Telegram ulanmagan"' : '' %>></td>
-        <td><a href="/admin/clients/<%= c.id %>"><b><%= c.name %></b></a></td>
-        <td>+<%= c.phone %></td>
-        <td><%= c.svc_count %><% if (c.suspended) { %> <span class="badge red"><%= c.suspended %> to'xt.</span><% } %></td>
-        <td><%= c.next_due ? u.fmtDate(c.next_due) : '—' %></td>
-        <td><%= c.tg_chat_id ? '✅' : '—' %></td>
+        <td data-label="Tanlash"><input type="checkbox" name="client_ids" value="<%= c.id %>" style="width:auto" <%= !c.tg_chat_id ? 'disabled title="Telegram ulanmagan"' : '' %>></td>
+        <td data-label="Ism"><a href="/admin/clients/<%= c.id %>"><b><%= c.name %></b></a></td>
+        <td data-label="Telefon">+<%= c.phone %></td>
+        <td data-label="Xizmatlar"><%= c.svc_count %><% if (c.suspended) { %> <span class="badge red"><%= c.suspended %> to'xt.</span><% } %></td>
+        <td data-label="Yaqin muddat"><%= c.next_due ? u.fmtDate(c.next_due) : '—' %></td>
+        <td data-label="Telegram"><%= c.tg_chat_id ? '✅' : '—' %></td>
       </tr>
       <% }) %>
+      </tbody>
     </table>
     <div style="margin-top:12px">
       <label>Tanlangan mijozlarga to'lov haqida xabar</label>

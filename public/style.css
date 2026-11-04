@@ -343,3 +343,140 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 14px 0; }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+
+/* ==========================================================================
+   Admin panel qobig'i — chap sidebar (desktop) / tortma menyu (mobil)
+   Faqat admin uchun, hammasi yangi klasslar: prefiks .adm-*
+   Eski `.top` / `nav a` qoidalariga TEGILMAYDI — ular mijoz qismida
+   (chead.ejs dagi .c-topnav) hamon ishlatiladi.
+   ========================================================================== */
+
+.adm-topbar {
+  display: none;
+  position: sticky; top: 0; z-index: 25;
+  align-items: center; gap: 10px;
+  background: var(--surface); border-bottom: 1px solid var(--line);
+  padding: 10px 14px;
+}
+.adm-burger {
+  width: 42px; height: 42px; flex: none;
+  display: grid; place-items: center;
+  border-radius: var(--r-sm); border: 1px solid var(--line);
+  background: var(--surface-2); color: var(--text);
+  font-size: 18px; line-height: 1; cursor: pointer;
+}
+.adm-burger:hover { background: var(--line); }
+.adm-topbar-title {
+  flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-weight: 700; font-size: 15px; letter-spacing: -.01em;
+}
+
+.adm-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 38;
+  background: rgba(16, 24, 40, .45);
+}
+.adm-overlay.show { display: block; }
+
+.adm-sidebar {
+  position: fixed; top: 0; left: 0; bottom: 0; z-index: 40;
+  width: 254px;
+  background: var(--surface); border-right: 1px solid var(--line);
+  display: flex; flex-direction: column;
+  padding: 14px 12px 16px;
+  transform: translateX(-100%);
+  transition: transform .22s ease;
+  overflow-y: auto;
+}
+.adm-sidebar.open { transform: translateX(0); box-shadow: var(--shadow-3); }
+.adm-sidebar .brand { padding: 6px 8px 18px; }
+
+.adm-nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.adm-nav a, .adm-nav .link {
+  display: flex; align-items: center; gap: 11px;
+  min-height: 44px; padding: 10px 12px; width: 100%;
+  border-radius: var(--r-sm); color: var(--text-2);
+  font: inherit; font-size: 14.5px; font-weight: 500;
+  background: none; border: 0; text-align: left; cursor: pointer;
+}
+.adm-nav a:hover, .adm-nav .link:hover { background: var(--surface-2); color: var(--text); }
+.adm-nav a.on { background: var(--brand-soft); color: var(--brand); font-weight: 700; }
+.adm-nav .ic { font-size: 16px; width: 20px; text-align: center; flex: none; }
+.adm-nav form { margin: 0; width: 100%; }
+.adm-logout { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--line); }
+
+@media (max-width: 959px) {
+  .adm-topbar { display: flex; }
+}
+@media (min-width: 960px) {
+  .adm-sidebar { transform: none !important; box-shadow: none !important; }
+  .adm-overlay { display: none !important; }
+  main.adm-main { margin-left: 254px; }
+}
+
+/* ------------------------------------------------- bosh sahifa statistikasi */
+/* .stats / .stat FAQAT admin/dashboard.ejs'da ishlatiladi (mijoz qismida
+   ishlatilmaydi) — shuning uchun kattaroq, aniqroq ko'rinish uchun shu
+   yerda to'g'ridan-to'g'ri KENGAYTIRAMIZ (eski qatorlar o'chirilmaydi,
+   faqat quyidagi qoidalar keyinroq kelgani uchun ustidan yoziladi). */
+.stats { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.stat { padding: 16px 18px; }
+.stat span { font-size: 12.5px; }
+.stat b { font-size: 24px; margin-top: 5px; }
+
+/* --------------------------------------------- admin jadvallari — ixcham sayqal */
+/* Faqat .adm-main ichida — mijoz sahifalariga (profile/payments) taʼsir qilmasin */
+.adm-main th, .adm-main td { padding: 12px 10px; }
+@media (max-width: 640px) {
+  .adm-main th, .adm-main td { padding: 10px 7px; }
+}
+
+/* --------------------------------------- jadval -> karta: usul A (data-label) */
+/* Oddiy ro'yxatlar uchun (mijozlar, xizmatlar, mijoz sahifasidagi jadvallar):
+   <thead> yashiriladi, har bir <td> alohida qatorga aylanadi,
+   data-label atributi kalit sifatida chiqadi. */
+table.adm-cardify { min-width: 0 !important; }
+@media (max-width: 640px) {
+  .adm-cardify, .adm-cardify tbody, .adm-cardify tr, .adm-cardify td { display: block; width: 100%; }
+  .adm-cardify thead { display: none; }
+  .adm-cardify tbody tr {
+    border: 1px solid var(--line); border-radius: var(--r);
+    margin-bottom: 10px; padding: 2px 13px;
+    background: var(--surface); box-shadow: var(--shadow-1);
+  }
+  .adm-cardify tbody tr:last-child { margin-bottom: 0; }
+  .adm-cardify td {
+    display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+    gap: 6px 10px; padding: 9px 0; border-bottom: 1px solid var(--line);
+    text-align: right; font-size: 14px;
+  }
+  .adm-cardify td:last-child { border-bottom: 0; }
+  .adm-cardify td::before {
+    content: attr(data-label); font-weight: 600; color: var(--muted);
+    font-size: 11px; text-transform: uppercase; letter-spacing: .04em;
+    text-align: left; margin-right: auto;
+  }
+}
+
+/* --------------------------------------- jadval -> karta: usul B (ikki marta render) */
+/* Chek rasmi / bir nechta tugmali qatorlar uchun (to'lovlar, pul qo'shish
+   so'rovlari): ota EJS ikki marta chiqaradi — desktop <table> va mobil
+   <div class="adm-cardrow"> ro'yxati, faqat biri ko'rinadi. */
+.adm-mobile-cards { display: flex; flex-direction: column; gap: 10px; }
+@media (max-width: 639px) { .adm-desktop-only { display: none !important; } }
+@media (min-width: 640px) { .adm-mobile-cards { display: none !important; } }
+
+.adm-cardrow {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r);
+  padding: 13px 14px; box-shadow: var(--shadow-1);
+}
+.adm-cardrow-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.adm-cardrow-main b { font-size: 14.5px; font-weight: 650; }
+.adm-cardrow-amt { flex: none; text-align: right; }
+.adm-cardrow-amt b { display: block; font-size: 15.5px; font-variant-numeric: tabular-nums; }
+.adm-cardrow-mid { font-size: 13px; color: var(--text-2); margin-top: 8px; }
+.adm-cardrow-receipt {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 9px;
+  font-size: 13px; font-weight: 600; color: var(--brand);
+}
+.adm-cardrow-foot { display: flex; align-items: center; gap: 8px; margin-top: 11px; flex-wrap: wrap; }

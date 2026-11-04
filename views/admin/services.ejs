@@ -3,16 +3,17 @@
 <p class="muted small">Yangi xizmat qo'shish uchun mijoz sahifasiga kiring.</p>
 <div class="card table-wrap">
   <% if (!services.length) { %><p class="muted">Xizmatlar yo'q.</p><% } else { %>
-  <table>
-    <tr><th>Nomi</th><th>Mijoz</th><th>Narx</th><th>Muddat</th><th>Holat</th><th></th></tr>
+  <table class="adm-cardify">
+    <thead><tr><th>Nomi</th><th>Mijoz</th><th>Narx</th><th>Muddat</th><th>Holat</th><th></th></tr></thead>
+    <tbody>
     <% services.forEach(s => { %>
     <tr>
-      <td><a href="/admin/services/<%= s.id %>"><b><%= s.name %></b></a><div class="type"><%= s.type === 'sayt' ? '🌐 sayt' : '🤖 bot' %></div></td>
-      <td><a href="/admin/clients/<%= s.client_id %>"><%= s.client_name %></a></td>
-      <td><%= u.money(s.price) %></td>
-      <td><%= u.fmtDate(s.paid_until) %></td>
-      <td><%- include('../partials/badge', { s }) %></td>
-      <td>
+      <td data-label="Nomi"><a href="/admin/services/<%= s.id %>"><b><%= s.name %></b></a><div class="type"><%= s.type === 'sayt' ? '🌐 sayt' : '🤖 bot' %></div></td>
+      <td data-label="Mijoz"><a href="/admin/clients/<%= s.client_id %>"><%= s.client_name %></a></td>
+      <td data-label="Narx"><%= u.money(s.price) %></td>
+      <td data-label="Muddat"><%= u.fmtDate(s.paid_until) %></td>
+      <td data-label="Holat"><%- include('../partials/badge', { s }) %></td>
+      <td data-label="Amal">
         <% if (s.status === 'active') { %>
           <form class="inline" method="post" action="/admin/services/<%= s.id %>/suspend" onsubmit="return confirm('To\'xtatilsinmi?')"><button class="btn sm ghost">⛔</button></form>
         <% } else { %>
@@ -21,6 +22,7 @@
       </td>
     </tr>
     <% }) %>
+    </tbody>
   </table>
   <% } %>
 </div>

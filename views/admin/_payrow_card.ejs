@@ -1,0 +1,32 @@
+<%# To'lov qatorining mobil (<640px) karta ko'rinishi — _payrow.ejs bilan bir xil ma'lumot,
+    faqat <table> emas, alohida karta. Ikkisi ham chiqadi, CSS biri yashiradi (usul B). %>
+<div class="adm-cardrow">
+  <div class="adm-cardrow-top">
+    <div class="adm-cardrow-main">
+      <b><%= p.client_name %></b>
+      <div class="muted small">+<%= p.phone %> · #<%= p.id %></div>
+    </div>
+    <div class="adm-cardrow-amt">
+      <b><%= u.money(p.amount) %></b>
+      <div class="muted small"><%= p.created_at %></div>
+    </div>
+  </div>
+  <div class="adm-cardrow-mid">
+    <%= p.service_name %> · <%= p.months %> oy
+    <% if (p.comment) { %><div class="muted small" style="margin-top:3px"><%= p.comment %></div><% } %>
+  </div>
+  <% if (p.receipt_path) { %>
+    <a class="adm-cardrow-receipt" href="/admin/receipt/<%= p.id %>" target="_blank">
+      <% if (/\.pdf$/i.test(p.receipt_path)) { %>📄 Chekni ko'rish (PDF)<% } else { %><img class="receipt-thumb" src="/admin/receipt/<%= p.id %>" alt="chek"> Chekni ko'rish<% } %>
+    </a>
+  <% } %>
+  <div class="adm-cardrow-foot">
+    <% if (p.status === 'pending') { %>
+      <form class="inline" method="post" action="/admin/payments/<%= p.id %>/approve"><button class="btn sm green">✓ Tasdiqlash</button></form>
+      <form class="inline" method="post" action="/admin/payments/<%= p.id %>/reject" onsubmit="const r=prompt('Rad etish sababi:');if(r===null)return false;this.note.value=r;">
+        <input type="hidden" name="note"><button class="btn sm red">✕ Rad</button>
+      </form>
+    <% } else if (p.status === 'approved') { %><span class="badge green">Tasdiqlangan</span>
+    <% } else { %><span class="badge red">Rad etilgan</span><% if (p.admin_note) { %><div class="muted small"><%= p.admin_note %></div><% } %><% } %>
+  </div>
+</div>
