@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const { db } = require('./db');
-const { esc, money, normPhone } = require('./utils');
+const { esc, money, normPhone, token } = require('./utils');
 
 const TOKEN = process.env.BOT_TOKEN;
 const ADMIN_CHAT_IDS = (process.env.ADMIN_CHAT_ID || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -21,6 +21,10 @@ function miniAppButton() {
 
 // Admin "/xabar" bilan tanlangan mijozlarga xabar yuborish jarayoni (xotirada, bitta admin uchun)
 const broadcastState = new Map();
+
+// Mijoz botga chek rasmini yubordi, lekin bir nechta xizmati bor — qaysi birini
+// tanlashini kutamiz (xotirada, chatId bo'yicha)
+const pendingReceipt = new Map();
 
 function buildBroadcastKeyboard(state) {
   const clients = db.prepare('SELECT id, name FROM clients WHERE tg_chat_id IS NOT NULL ORDER BY name').all();
@@ -69,6 +73,11 @@ async function notifyAdminPayment(p) {
   const caption =
     `🧾 <b>Yangi to'lov #${p.id}</b>\n` +
     `👤 ${esc(p.client_name)} (${esc(p.phone)})\n` +
+    // Bot orqali (chek rasmi to'g'ridan-to'g'ri yuborilganda) qo'shiladi — saytdan/Mini
+    // App'dan kelgan to'lovlarda bu maydonlar yo'q, shuning uchun qator butunlay tushib qoladi
+    (p.tg_username || p.tg_id
+      ? `💬 Telegram: ${p.tg_username ? '@' + esc(p.tg_username) : "username yo'q"}${p.tg_id ? ` (ID: <code>${p.tg_id}</code>)` : ''}\n`
+      : '') +
     `🤖 ${esc(p.service_name)}\n` +
     `📅 ${p.months} oy\n` +
     `💰 ${Number(p.amount).toLocaleString('ru-RU')} so'm` +
@@ -124,6 +133,64 @@ async function notifyAdminTopup(t) {
       if (r) continue;
     }
     await send(chatId, caption, { reply_markup });
+  }
+}
+
+// Telegram serveridan fayl yuklab olib uploads/ papkasiga saqlaydi — saytdagi
+// multer yuklashlari bilan BIR XIL nomlash uslubida (Date.now() + token), shunda
+// admin panel/chek ko'rish yo'li o'zgarishsiz ishlayveradi.
+async function downloadTelegramFile(fileId) {
+  const info = await call('getFile', { file_id: fileId });
+  if (!info || !info.file_path) return null;
+  try {
+    const res = await fetch(`https://api.telegram.org/file/bot${TOKEN}/${info.file_path}`);
+    if (!res.ok) return null;
+    const buf = Buffer.from(await res.arrayBuffer());
+    const ext = path.extname(info.file_path) || '.jpg';
+    const dir = path.join(__dirname, '..', 'uploads');
+    fs.mkdirSync(dir, { recursive: true });
+    const dest = path.join(dir, `${Date.now()}_${token(6)}${ext}`);
+    fs.writeFileSync(dest, buf);
+    return dest;
+  } catch (e) {
+    console.error('[telegram] chek faylini yuklab olishda xato:', e.message);
+    return null;
+  }
+}
+
+// Mijoz botga chek rasmini TO'G'RIDAN-TO'G'RI yuborganda — saytdagi "chek yuklash"
+// bilan bir xil natija: pending to'lov yozuvi + adminga tasdiqlash tugmalari.
+// Bot orqali kelgan chek har doim 1 oy deb hisoblanadi (ko'proq oy uchun sayt/Mini App).
+async function createReceiptPayment(client, service, fileId, tgInfo, chatId) {
+  const filePath = await downloadTelegramFile(fileId);
+  if (!filePath) return send(chatId, "⚠️ Chekni yuklab olishda xato. Qaytadan yuboring yoki saytdan foydalaning.");
+
+  const months = 1;
+  const amount = service.price * months;
+  const r = db.prepare('INSERT INTO payments (client_id, service_id, months, amount, receipt_path) VALUES (?, ?, ?, ?, ?)')
+    .run(client.id, service.id, months, amount, filePath);
+
+  await notifyAdminPayment({
+    id: r.lastInsertRowid, client_name: client.name, phone: client.phone,
+    service_name: service.name, months, amount, receipt_path: filePath,
+    tg_username: tgInfo.username, tg_id: tgInfo.id,
+  });
+  return send(chatId, `✅ Chekingiz qabul qilindi!\n🤖 <b>${esc(service.name)}</b> — 1 oy, ${money(amount)}\nAdmin tasdiqlagach muddat avtomatik uzayadi.`);
+}
+
+// Hisobi ulanmagan yoki xizmati yo'q odamdan kelgan chek — to'lov yozuvi YARATILMAYDI
+// (qaysi xizmatga tegishli ekani noma'lum), faqat adminga forward qilinadi, ism/username/ID bilan
+async function forwardUnknownReceipt(fileId, tgInfo, chatId, client) {
+  if (!ADMIN_CHAT_IDS.length) return;
+  const who = client
+    ? `👤 ${esc(client.name)} (${esc(client.phone)}) — hisobi ulangan, lekin xizmati yo'q`
+    : "⚠️ Hisobi ulanmagan odam";
+  const caption =
+    `🧾 <b>Chek keldi (avtomatik aniqlab bo'lmadi)</b>\n${who}\n` +
+    `Ism: ${esc(tgInfo.name || '—')}${tgInfo.username ? ` (@${esc(tgInfo.username)})` : ''}\n` +
+    `Telegram ID: <code>${tgInfo.id}</code>`;
+  for (const adminId of ADMIN_CHAT_IDS) {
+    await call('sendPhoto', { chat_id: adminId, photo: fileId, caption, parse_mode: 'HTML' });
   }
 }
 
@@ -236,14 +303,57 @@ async function handleUpdate(u) {
     return sendMiniAppButton(chatId);
   }
 
+  // Mijoz botga chek rasmini to'g'ridan-to'g'ri yuborgan — avtomatik to'lov so'rovi yaratamiz
+  if (u.message && u.message.photo && u.message.photo.length) {
+    const chatId = String(u.message.chat.id);
+    const from = u.message.from || {};
+    const tgInfo = { id: from.id, username: from.username, name: [from.first_name, from.last_name].filter(Boolean).join(' ') };
+    // Eng katta o'lchamdagi versiyasi — Telegram bir nechta o'lchamda yuboradi, oxirgisi eng sifatlisi
+    const fileId = u.message.photo[u.message.photo.length - 1].file_id;
+
+    const client = db.prepare('SELECT * FROM clients WHERE tg_chat_id = ?').get(chatId);
+    if (!client) {
+      await forwardUnknownReceipt(fileId, tgInfo, chatId, null);
+      return send(chatId, "Chekingiz adminga yuborildi, lekin hisobingiz hali ulanmagan — tezroq ko'rib chiqilishi uchun admin bilan bog'laning: @Coder_uzzz");
+    }
+
+    const services = db.prepare('SELECT * FROM services WHERE client_id = ?').all(client.id);
+    if (!services.length) {
+      await forwardUnknownReceipt(fileId, tgInfo, chatId, client);
+      return send(chatId, "Sizda hali xizmat biriktirilmagan. Chekingiz baribir adminga yuborildi.");
+    }
+    if (services.length === 1) {
+      return createReceiptPayment(client, services[0], fileId, tgInfo, chatId);
+    }
+    // Bir nechta xizmat bor — qaysi biri uchunligini so'raymiz, javobni kutamiz
+    pendingReceipt.set(chatId, { fileId, tgInfo });
+    const kb = { inline_keyboard: services.map(s => [{ text: s.name, callback_data: `recv_svc:${s.id}` }]) };
+    return send(chatId, 'Bu chek qaysi xizmat uchun?', { reply_markup: kb });
+  }
+
   if (u.callback_query) {
     const q = u.callback_query;
     const chatId = String(q.message?.chat?.id || q.from.id);
+    const [action, idStr] = (q.data || '').split(':');
+    const id = Number(idStr);
+
+    // Mijoz chek rasmi uchun xizmat tanlayapti — bu ADMIN tekshiruvidan oldin
+    // turishi SHART, chunki mijoz admin emas (quyidagi guard uni rad etib yuborardi)
+    if (action === 'recv_svc') {
+      const pending = pendingReceipt.get(chatId);
+      pendingReceipt.delete(chatId);
+      await call('answerCallbackQuery', { callback_query_id: q.id });
+      await call('editMessageReplyMarkup', { chat_id: chatId, message_id: q.message.message_id, reply_markup: { inline_keyboard: [] } });
+      if (!pending) return send(chatId, "⚠️ Jarayon eskirgan, chekni qaytadan yuboring.");
+      const client = db.prepare('SELECT * FROM clients WHERE tg_chat_id = ?').get(chatId);
+      const service = client && db.prepare('SELECT * FROM services WHERE id = ? AND client_id = ?').get(id, client.id);
+      if (!client || !service) return send(chatId, "⚠️ Xizmat topilmadi.");
+      return createReceiptPayment(client, service, pending.fileId, pending.tgInfo, chatId);
+    }
+
     if (!ADMIN_CHAT_IDS.includes(chatId)) {
       return call('answerCallbackQuery', { callback_query_id: q.id, text: 'Ruxsat yo\'q' });
     }
-    const [action, idStr] = (q.data || '').split(':');
-    const id = Number(idStr);
     if (action === 'approve') {
       const r = await billing.approvePayment(id);
       await call('answerCallbackQuery', { callback_query_id: q.id, text: r.ok ? 'Tasdiqlandi ✅' : r.error });
