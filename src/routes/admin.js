@@ -120,7 +120,7 @@ router.get('/clients/:id', (req, res) => {
   const services = db.prepare('SELECT * FROM services WHERE client_id = ? ORDER BY id').all(client.id);
   const payments = db.prepare('SELECT p.*, s.name AS service_name FROM payments p JOIN services s ON s.id = p.service_id WHERE p.client_id = ? ORDER BY p.id DESC LIMIT 50').all(client.id);
   const topups = db.prepare('SELECT * FROM topups WHERE client_id = ? ORDER BY id DESC LIMIT 50').all(client.id);
-  res.render('admin/client', { title: client.name, c: client, services, payments, topups, defaultDate: addMonths(today(), 1) });
+  res.render('admin/client', { title: client.name, c: client, services, payments, topups, defaultDate: addMonths(today(), 1), autoWait: billing.AUTO_CHARGE_WAIT_MIN });
 });
 
 router.post('/clients/:id', (req, res) => {

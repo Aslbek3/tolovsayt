@@ -6,6 +6,9 @@
   <div>
     <span class="muted small">Balans</span>
     <div class="price" style="margin-top:2px"><%= u.money(c.balance) %></div>
+    <% if (c.balance > 0) { %>
+    <div class="muted small" style="margin-top:4px">⏳ Balans to'ldirilganiga <%= autoWait %> daqiqa o'tgach, muddati yaqin/o'tgan xizmatga avtomatik yechiladi<%= c.balance_at ? ` (to'ldirilgan: ${c.balance_at})` : '' %></div>
+    <% } %>
   </div>
   <form class="inline" method="post" action="/admin/clients/<%= c.id %>/balance" onsubmit="return confirm('Balansni o\'zgartirasizmi?')">
     <input name="amount" type="text" inputmode="numeric" placeholder="masalan 50000" style="width:160px" required>
@@ -95,7 +98,8 @@
       <td data-label="Sana"><%= p.created_at %></td>
       <td data-label="Xizmat"><%= p.service_name %></td>
       <td data-label="Muddat"><%= p.months %> oy</td>
-      <td data-label="Summa"><%= u.money(p.amount) %></td>
+      <td data-label="Summa"><%= u.money(p.amount) %>
+        <div class="muted small"><%= p.comment === "Balansdan to'landi" ? (String(p.admin_note || '').startsWith('Avto') ? '💳 balansdan · avto' : '💳 balansdan') : (p.receipt_path ? '🧾 chek' : '') %></div></td>
       <td data-label="Holat"><span class="badge <%= p.status === 'approved' ? 'green' : p.status === 'pending' ? 'amber' : 'red' %>"><%= { pending: 'Kutilmoqda', approved: 'Tasdiqlangan', rejected: 'Rad etilgan' }[p.status] %></span></td>
     </tr>
     <% }) %>
