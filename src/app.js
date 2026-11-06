@@ -62,5 +62,7 @@ app.listen(PORT, () => console.log(`✅ Sayt ishga tushdi: http://localhost:${PO
 cron.schedule('0 10 * * *', () => billing.dailyCheck().catch(console.error), { timezone: 'Asia/Tashkent' });
 // Ishga tushganda ham bir marta tekshirish
 setTimeout(() => billing.dailyCheck().catch(console.error), 10000);
+// Har daqiqa: balansda pul turgan bo'lsa (to'ldirilganiga 15 daq o'tgan) — kutilayotgan obunaga yechish
+cron.schedule('* * * * *', () => billing.autoCharge().catch(console.error), { timezone: 'Asia/Tashkent' });
 
 tg.startPolling();

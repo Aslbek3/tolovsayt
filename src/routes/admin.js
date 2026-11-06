@@ -153,7 +153,12 @@ router.post('/clients/:id/balance', (req, res) => {
   const subtract = req.body.direction === 'subtract';
   const capped = subtract && raw > client.balance;
   const delta = subtract ? -Math.min(raw, client.balance) : raw;
-  db.prepare('UPDATE clients SET balance = balance + ? WHERE id = ?').run(delta, client.id);
+  if (delta > 0) {
+    // to'ldirildi — avto-yechishdan oldin mijozga 15 daqiqa beriladi
+    db.prepare("UPDATE clients SET balance = balance + ?, balance_at = datetime('now','localtime') WHERE id = ?").run(delta, client.id);
+  } else {
+    db.prepare('UPDATE clients SET balance = balance + ? WHERE id = ?').run(delta, client.id);
+  }
   const newBalance = client.balance + delta;
   tg.send(client.tg_chat_id, `💰 Hisobingiz admin tomonidan ${delta > 0 ? "to'ldirildi" : 'ayirildi'}: ${delta > 0 ? '+' : ''}${delta.toLocaleString('ru-RU')} so'm\nJoriy balans: <b>${newBalance.toLocaleString('ru-RU')} so'm</b>`);
   req.flash(capped ? 'error' : 'success',

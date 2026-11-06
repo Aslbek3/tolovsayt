@@ -93,10 +93,11 @@ async function approveTopup(topupId, note = null) {
   if (!t) return { ok: false, error: "Pul qo'shish so'rovi topilmadi" };
   if (t.status !== 'pending') return { ok: false, error: "Bu so'rov allaqachon ko'rib chiqilgan" };
   db.prepare("UPDATE topups SET status = 'approved', admin_note = ?, reviewed_at = datetime('now','localtime') WHERE id = ?").run(note, topupId);
-  db.prepare('UPDATE clients SET balance = balance + ? WHERE id = ?').run(t.amount, t.client_id);
+  db.prepare("UPDATE clients SET balance = balance + ?, balance_at = datetime('now','localtime') WHERE id = ?").run(t.amount, t.client_id);
   const client = getClient(t.client_id);
   if (client) {
-    tg.send(client.tg_chat_id, `✅ Hisobingiz ${money(t.amount)} ga to'ldirildi!\n💰 Joriy balans: <b>${money(client.balance)}</b>`);
+    tg.send(client.tg_chat_id, `✅ Hisobingiz ${money(t.amount)} ga to'ldirildi!\n💰 Joriy balans: <b>${money(client.balance)}</b>\n\n` +
+      `ℹ️ ${AUTO_CHARGE_WAIT_MIN} daqiqa ichida o'zingiz xizmat tanlab to'lamasangiz, pul muddati yaqin xizmatingizga avtomatik o'tkaziladi.`);
   }
   return { ok: true, balance: client ? client.balance : null };
 }
@@ -114,7 +115,7 @@ async function rejectTopup(topupId, note) {
 }
 
 // Balansdan to'lash — chek yuklash/admin tasdiqlovisiz, darhol xizmat muddatini uzaytiradi
-async function payFromBalance(serviceId, months) {
+async function payFromBalance(serviceId, months, note = 'Balansdan avtomatik') {
   const s = getService(serviceId);
   if (!s) return { ok: false, error: 'Xizmat topilmadi' };
   const client = getClient(s.client_id);
@@ -122,7 +123,7 @@ async function payFromBalance(serviceId, months) {
   if (!client || client.balance < amount) return { ok: false, error: "Balansda yetarli mablag' yo'q" };
   db.prepare('UPDATE clients SET balance = balance - ? WHERE id = ?').run(amount, client.id);
   db.prepare(`INSERT INTO payments (client_id, service_id, months, amount, comment, status, admin_note, reviewed_at)
-    VALUES (?, ?, ?, ?, 'Balansdan to''landi', 'approved', 'Balansdan avtomatik', datetime('now','localtime'))`).run(client.id, serviceId, months, amount);
+    VALUES (?, ?, ?, ?, 'Balansdan to''landi', 'approved', ?, datetime('now','localtime'))`).run(client.id, serviceId, months, amount, note);
   const r = await extendService(serviceId, months);
   return { ok: true, paid_until: fmtDate(r.paid_until), balance: client.balance - amount };
 }
@@ -175,6 +176,47 @@ async function dailyCheck() {
   if (soonForAdmin.length) {
     tg.sendAdmin('📋 Muddati yaqin xizmatlar:\n' + soonForAdmin.map(s => `• ${esc(s.name)} — ${esc(s.client_name)} — ${fmtDate(s.paid_until)}`).join('\n'));
   }
+}
+
+// ── Balansdan avto-yechish ──────────────────────────────────────────────────
+// Muammo: "Hisobga pul qo'shish" tasdiqlansa pul faqat BALANSGA tushadi; mijoz o'zi
+// "Balansdan to'lash" ni bosmasa, xizmat muddati uzaymaydi va keyin avto-to'xtatiladi.
+// Yechim: balans to'ldirilgandan AUTO_CHARGE_WAIT_MIN daqiqa o'tib, pul hali turgan bo'lsa,
+// "obuna kutayotgan" xizmatga (to'xtatilgan / muddati o'tgan / eslatma oynasidagi) 1 oylik
+// to'lov o'zi yechiladi — eng yaqin muddatlisidan boshlab. Pul yetmasa — tegilmaydi.
+const AUTO_CHARGE_WAIT_MIN = 15;
+let autoChargeRunning = false;
+
+function chargeWindowDays() {
+  const days = String(getSetting('remind_days') || '').split(',')
+    .map(x => x.trim()).filter(Boolean).map(Number).filter(n => !isNaN(n));
+  return days.length ? Math.max(...days) : 3;
+}
+
+async function autoCharge() {
+  if (autoChargeRunning) return [];
+  autoChargeRunning = true;
+  const done = [];
+  try {
+    const window = chargeWindowDays();
+    const clients = db.prepare(`SELECT * FROM clients WHERE balance > 0
+      AND (balance_at IS NULL OR balance_at <= datetime('now','localtime', ?))`).all(`-${AUTO_CHARGE_WAIT_MIN} minutes`);
+    for (const c of clients) {
+      const due = db.prepare('SELECT * FROM services WHERE client_id = ? AND price > 0 ORDER BY paid_until').all(c.id)
+        .filter(s => s.status === 'suspended' || daysLeft(s.paid_until) <= window);
+      for (const s of due) {
+        const r = await payFromBalance(s.id, 1, `Avto: balansdan (${AUTO_CHARGE_WAIT_MIN} daq o'tib)`);
+        if (!r.ok) continue; // pul yetmaydi — keyingisi arzonroq bo'lishi mumkin
+        done.push({ client: c.name, service: s.name, amount: s.price, paid_until: r.paid_until });
+        tg.send(c.tg_chat_id, `💳 Balansingizdan <b>${esc(s.name)}</b> uchun ${money(s.price)} avtomatik yechildi.\n` +
+          `📅 Yangi muddat: <b>${r.paid_until}</b>\n💰 Qoldiq: ${money(r.balance)}`);
+        tg.sendAdmin(`💳 Avto to'lov (balansdan): <b>${esc(s.name)}</b> — ${esc(c.name)} — ${money(s.price)}\n📅 Yangi muddat: ${r.paid_until}`);
+      }
+    }
+  } finally {
+    autoChargeRunning = false;
+  }
+  return done;
 }
 
 // Mijozning o'z xizmatlari haqida hisobot (Telegram bot uchun)
@@ -253,5 +295,5 @@ function dueReport(kind) {
 module.exports = {
   runCmd, suspendService, resumeService, extendService, approvePayment, rejectPayment, dailyCheck, dueReport, getService,
   clientServicesReport, clientPaymentsReport, accountSummary, clientAccountReport,
-  getClient, requestTopup, approveTopup, rejectTopup, payFromBalance,
+  getClient, requestTopup, approveTopup, rejectTopup, payFromBalance, autoCharge, AUTO_CHARGE_WAIT_MIN,
 };

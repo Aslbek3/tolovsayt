@@ -78,6 +78,10 @@ CREATE TABLE IF NOT EXISTS topups (
 const hasBalance = db.prepare("SELECT 1 FROM pragma_table_info('clients') WHERE name = 'balance'").get();
 if (!hasBalance) db.exec('ALTER TABLE clients ADD COLUMN balance INTEGER NOT NULL DEFAULT 0');
 
+// Balans oxirgi marta qachon TO'LDIRILGANI — avto-yechish mijozga 15 daqiqa vaqt berishi uchun
+const hasBalanceAt = db.prepare("SELECT 1 FROM pragma_table_info('clients') WHERE name = 'balance_at'").get();
+if (!hasBalanceAt) db.exec('ALTER TABLE clients ADD COLUMN balance_at TEXT');
+
 const defaults = {
   site_name: "Server to'lovlari",
   card_number: '8600 0000 0000 0000',
